@@ -10,7 +10,10 @@ const PUBLIC = ["/family/login", "/family/signup", "/resident/login", "/staff/lo
 
 // Refreshes the Supabase session cookie and bounces signed-out visitors to the right login.
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // Server components read the current path from this header (used for the resident PIN-change gate).
+  const forwarded = new Headers(request.headers);
+  forwarded.set("x-pathname", request.nextUrl.pathname);
+  let response = NextResponse.next({ request: { headers: forwarded } });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,7 +22,7 @@ export async function proxy(request: NextRequest) {
         getAll: () => request.cookies.getAll(),
         setAll(list) {
           list.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = NextResponse.next({ request: { headers: forwarded } });
           list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         },
       },

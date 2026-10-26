@@ -19,6 +19,9 @@ insert into public.contacts (id, facility_id, resident_id, family_user_id, relat
   ('d1000000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', 'a1000000-0000-0000-0000-000000000004', 'Father');
 insert into public.flag_keywords (facility_id, word) values ('11111111-0000-0000-0000-000000000001', 'weapon');
 
+-- the demo seed also has messages; these tests assume none (rolled back with the transaction)
+delete from public.messages;
+
 -- default setting: hold everything --------------------------------------------------------
 select tests.as_user('a1000000-0000-0000-0000-000000000003');
 select lives_ok($$select public.send_message('d1000000-0000-0000-0000-000000000001', 'Hi love, hope you are well')$$, 'family can message an approved contact');
