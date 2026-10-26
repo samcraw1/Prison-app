@@ -135,6 +135,40 @@ async function main() {
     "messages",
   );
 
+  // ---- video visit slots and visits (times are relative to "now" so the demo is joinable right after seeding)
+  const at = (offsetMin: number) => new Date(Date.now() + offsetMin * 60_000).toISOString();
+  const slot = async (startMin: number, minutes: number, capacity: number) =>
+    (await must(
+      admin.from("visit_slots").insert({ facility_id: fid, starts_at: at(startMin), ends_at: at(startMin + minutes), capacity, created_by: staffIds["staff@demo-county.test"] }).select("id").single(),
+      "slot",
+    ))!.id as string;
+  const nowSlot = await slot(-2, 30, 2); // already open: joinable immediately
+  const tomorrow = await slot(24 * 60 + 60, 30, 1);
+  for (const day of [2, 3, 4]) await slot(day * 24 * 60 + 60, 30, 2);
+  const yesterday = await slot(-24 * 60, 30, 1);
+  const visit = (i: number, slotId: string, status: string, extra: Record<string, unknown> = {}) => ({
+    facility_id: fid, contact_id: contactIds[i], slot_id: slotId, status, requested_by: familyIds[i], ...extra,
+  });
+  const staffId = staffIds["staff@demo-county.test"];
+  await must(
+    admin.from("visits").insert([
+      visit(0, nowSlot, "approved", { decided_by: staffId, decided_at: at(-60) }),
+      visit(1, nowSlot, "approved", { decided_by: staffId, decided_at: at(-60) }),
+      visit(2, tomorrow, "requested"),
+      visit(3, yesterday, "ended", {
+        decided_by: staffId, decided_at: at(-2000), started_at: at(-24 * 60), ended_at: at(-24 * 60 + 22), ended_by: staffId, end_reason: "staff",
+      }),
+    ]),
+    "visits",
+  );
+
+  // ---- a few audit entries so the log is not empty on first load
+  const log = (action: string, entity: string, detail: Record<string, unknown> = {}) =>
+    admin.rpc("log_action", { p_facility: fid, p_action: action, p_entity: entity, p_entity_id: null, p_detail: detail, p_actor: staffId });
+  await log("connection.approve", "connection_request", { note: "seeded" });
+  await log("message.approve", "message", { note: "seeded" });
+  await log("visit.approve", "visit", { note: "seeded" });
+
   console.log("Seeded demo-county.");
   console.log(`Staff:    staff@demo-county.test / admin@demo-county.test  (${DEMO_PASSWORD})`);
   console.log(`Family:   family1..5@example.test (${DEMO_PASSWORD})`);

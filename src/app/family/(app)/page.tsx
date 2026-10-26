@@ -17,11 +17,14 @@ export default async function FamilyHome() {
   return (
     <div className="space-y-6">
       <Card>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-xl font-semibold">Your connections</h1>
+          <div className="flex gap-2">
+          <Link href="/family/visits" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50">Video visits</Link>
           <Link href="/family/connect" className="rounded-lg bg-blue-800 px-4 py-2 text-sm font-medium text-white hover:bg-blue-900">
             Connect with someone
           </Link>
+          </div>
         </div>
         {contactList.length ? (
           <ul className="mt-4 divide-y divide-slate-100">

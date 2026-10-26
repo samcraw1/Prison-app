@@ -26,6 +26,15 @@ export default async function ResidentHome() {
           ))}
         </ul>
       )}
+      {contacts.length > 0 && (
+        <Link
+          href="/resident/visits"
+          className="mt-6 flex items-center gap-5 rounded-2xl border-2 border-blue-800 bg-blue-50 p-6 text-2xl font-medium active:bg-blue-100"
+        >
+          <span aria-hidden className="text-4xl">📹</span>
+          <span>Video visits</span>
+        </Link>
+      )}
     </div>
   );
 }

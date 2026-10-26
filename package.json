@@ -10,7 +10,8 @@
     "seed": "tsx --env-file=.env.local scripts/seed.ts",
     "db:reset": "npx supabase db reset && npm run seed",
     "test:db": "npx supabase test db",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:int": "scripts/test-integration.sh"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.94.0",
