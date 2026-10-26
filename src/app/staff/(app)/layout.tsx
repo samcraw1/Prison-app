@@ -25,6 +25,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           <Link href="/staff/visits" className="text-slate-700 hover:text-blue-800">Visits</Link>
           <Link href="/staff/residents" className="text-slate-700 hover:text-blue-800">Residents</Link>
           <Link href="/staff/settings" className="text-slate-700 hover:text-blue-800">Settings</Link>
+          <Link href="/staff/audit" className="text-slate-700 hover:text-blue-800">Audit log</Link>
           {profile.role === "admin" && <Link href="/staff/team" className="text-slate-700 hover:text-blue-800">Team</Link>}
         </div>
       </nav>
