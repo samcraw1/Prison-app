@@ -44,7 +44,5 @@ describe("connection approval flow", () => {
     // another resident sees nothing
     const res2 = await asResident("DEMO-1004");
     expect((await res2.rpc("list_my_contacts")).data).toHaveLength(0);
-
-    await admin.from("connection_requests").select("id").eq("id", reqId); // keep handle used
   });
 });
