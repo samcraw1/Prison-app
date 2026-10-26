@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx --env-file=.env.local scripts/seed.ts",
-    "db:reset": "supabase db reset && npm run seed",
-    "test:db": "supabase test db",
+    "db:reset": "npx supabase db reset && npm run seed",
+    "test:db": "npx supabase test db",
     "test": "vitest run"
   },
   "dependencies": {

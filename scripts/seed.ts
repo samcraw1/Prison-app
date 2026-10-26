@@ -54,7 +54,7 @@ async function main() {
     admin.from("facilities").insert({ name: "Demo County Jail (fictional)", slug: "demo-county" }).select("id").single(),
     "facility",
   );
-  const fid = facility.id;
+  const fid = facility!.id;
 
   const staffIds: Record<string, string> = {};
   for (const s of STAFF) staffIds[s.email] = await createUser(fid, s.role, s.email, DEMO_PASSWORD, s.name);
@@ -70,7 +70,7 @@ async function main() {
         .single(),
       `resident ${r.booking}`,
     );
-    residentIds.push(row.id);
+    residentIds.push(row!.id);
   }
 
   const familyIds: string[] = [];
