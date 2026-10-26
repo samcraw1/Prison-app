@@ -27,8 +27,8 @@ export default async function FamilyHome() {
           <ul className="mt-4 divide-y divide-slate-100">
             {contactList.map((c) => (
               <li key={c.contact_id} className="flex items-center justify-between py-3">
-                <span className="font-medium">{c.name}</span>
-                <Badge tone="green">Approved</Badge>
+                <Link href={`/family/messages/${c.contact_id}`} className="font-medium text-blue-800 hover:underline">{c.name}</Link>
+                <Link href={`/family/messages/${c.contact_id}`} className="text-sm text-blue-800 underline">Messages</Link>
               </li>
             ))}
           </ul>

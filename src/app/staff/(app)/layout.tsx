@@ -21,6 +21,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         <div className="mx-auto flex max-w-6xl gap-6 px-4 py-2 text-sm">
           <Link href="/staff" className="text-slate-700 hover:text-blue-800">Dashboard</Link>
           <Link href="/staff/requests" className="text-slate-700 hover:text-blue-800">Requests</Link>
+          <Link href="/staff/messages" className="text-slate-700 hover:text-blue-800">Messages</Link>
         </div>
       </nav>
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>

@@ -41,8 +41,9 @@ describe("connection approval flow", () => {
     const { data: resContacts } = await res.rpc("list_my_contacts");
     expect(resContacts.map((c: { name: string }) => c.name)).toContain("Dana Fakename");
 
-    // another resident sees nothing
+    // another resident does not see this family member
     const res2 = await asResident("DEMO-1004");
-    expect((await res2.rpc("list_my_contacts")).data).toHaveLength(0);
+    const { data: res2Contacts } = await res2.rpc("list_my_contacts");
+    expect(res2Contacts.map((c: { name: string }) => c.name)).not.toContain("Dana Fakename");
   });
 });

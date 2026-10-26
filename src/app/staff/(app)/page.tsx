@@ -9,6 +9,11 @@ export default async function StaffDashboard() {
     .select("id", { count: "exact", head: true })
     .eq("status", "pending");
 
+  const [{ count: held }, { count: flagged }] = await Promise.all([
+    supabase.from("messages").select("id", { count: "exact", head: true }).eq("status", "held"),
+    supabase.from("messages").select("id", { count: "exact", head: true }).eq("flagged", true).neq("status", "rejected"),
+  ]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Dashboard</h1>
@@ -17,6 +22,18 @@ export default async function StaffDashboard() {
           <Card className="transition hover:border-blue-700">
             <p className="text-3xl font-semibold">{pendingRequests ?? 0}</p>
             <p className="text-sm text-slate-600">Connection requests waiting</p>
+          </Card>
+        </Link>
+        <Link href="/staff/messages">
+          <Card className="transition hover:border-blue-700">
+            <p className="text-3xl font-semibold">{held ?? 0}</p>
+            <p className="text-sm text-slate-600">Messages held for review</p>
+          </Card>
+        </Link>
+        <Link href="/staff/messages">
+          <Card className="transition hover:border-amber-500">
+            <p className="text-3xl font-semibold">{flagged ?? 0}</p>
+            <p className="text-sm text-slate-600">Flagged messages</p>
           </Card>
         </Link>
       </div>

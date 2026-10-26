@@ -1,4 +1,5 @@
 // Seeds a demo facility with obviously fake data. Run after `supabase db reset`.
+import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -75,6 +76,64 @@ async function main() {
 
   const familyIds: string[] = [];
   for (const f of FAMILIES) familyIds.push(await createUser(fid, "family", f.email, DEMO_PASSWORD, f.name, f.phone));
+
+  // ---- keywords
+  for (const word of ["weapon", "escape", "contraband"]) {
+    await must(admin.from("flag_keywords").insert({ facility_id: fid, word, created_by: staffIds["staff@demo-county.test"] }), `keyword ${word}`);
+  }
+
+  // ---- approved contacts: family N <-> resident N
+  const rels = ["Mother", "Sister", "Brother", "Wife", "Friend"];
+  const contactIds: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    const c = await must(
+      admin.from("contacts").insert({ facility_id: fid, resident_id: residentIds[i], family_user_id: familyIds[i], relationship: rels[i] }).select("id").single(),
+      `contact ${i}`,
+    );
+    contactIds.push(c!.id);
+  }
+
+  // ---- ID photo + a pending (matched) and an unmatched request for the staff queue
+  const idPng = readFileSync("scripts/assets/sample-id.png");
+  async function idPhoto(familyId: string) {
+    const path = `${fid}/${familyId}/sample-id.png`;
+    const { error } = await admin.storage.from("id-photos").upload(path, idPng, { contentType: "image/png", upsert: true });
+    if (error) throw new Error(`id photo: ${error.message}`);
+    return path;
+  }
+  await must(
+    admin.from("connection_requests").insert({
+      facility_id: fid, family_user_id: familyIds[4], resident_id: residentIds[0], typed_resident_name: "Alex Demo",
+      typed_booking_number: "DEMO-1001", relationship: "Cousin", id_photo_path: await idPhoto(familyIds[4]),
+    }),
+    "pending request",
+  );
+  await must(
+    admin.from("connection_requests").insert({
+      facility_id: fid, family_user_id: familyIds[2], resident_id: null, typed_resident_name: "Unknown Person",
+      typed_booking_number: "DEMO-9999", relationship: "Friend", id_photo_path: await idPhoto(familyIds[2]),
+    }),
+    "unmatched request",
+  );
+
+  // ---- sample messages (inserted directly with explicit status; real traffic goes through send_message)
+  const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
+  const msg = (i: number, sender: "family" | "resident", body: string, status: "held" | "delivered", min: number, flag: string[] = []) => ({
+    facility_id: fid, contact_id: contactIds[i], sender, body, status,
+    flagged: flag.length > 0, flag_reasons: flag, created_at: ago(min), delivered_at: status === "delivered" ? ago(min) : null,
+  });
+  await must(
+    admin.from("messages").insert([
+      msg(0, "family", "Hi love, the garden is doing great this year. Thinking of you every day.", "delivered", 240),
+      msg(0, "resident", "Miss you too, Mom. Tell everyone I said hi.", "delivered", 200),
+      msg(0, "family", "We're coming to see you Saturday. Bring a drawing for your niece?", "held", 12),
+      msg(1, "family", "Do you need anything from the legal aid office? I can call them Monday.", "held", 25),
+      msg(2, "resident", "I heard there might be an escape plan, jk. Funny rumor going around.", "held", 8, ["escape"]),
+      msg(3, "family", "Happy anniversary. The kids made you cards, I will send photos soon.", "delivered", 90),
+      msg(4, "resident", "Thanks for putting money on my books, buddy.", "held", 5),
+    ]),
+    "messages",
+  );
 
   console.log("Seeded demo-county.");
   console.log(`Staff:    staff@demo-county.test / admin@demo-county.test  (${DEMO_PASSWORD})`);
