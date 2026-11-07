@@ -12,7 +12,7 @@ export default async function ResidentLayout({ children }: { children: React.Rea
   return (
     <div className="min-h-screen">
       <header className="flex items-center justify-between bg-blue-900 px-6 py-4 text-white">
-        <span className="text-2xl font-semibold">{APP_NAME}</span>
+        <span className="flex items-center gap-3 text-2xl font-semibold">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/emblem.svg" alt="" className="h-9 w-auto" />{APP_NAME}</span>
         <div className="flex items-center gap-6 text-lg">
           <span>{profile.full_name}</span>
           <SignOut next="/resident/login" className="text-white" />

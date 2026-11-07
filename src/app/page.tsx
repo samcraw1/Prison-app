@@ -10,10 +10,21 @@ const ENTRIES = [
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="text-3xl font-semibold">{APP_NAME}</h1>
-      <p className="mt-2 text-slate-600">Secure communication between residents and their families, approved and monitored by facility staff.</p>
-      <div className="mt-10 grid gap-4 sm:grid-cols-3">
+    <main>
+      <section className="relative overflow-hidden bg-blue-900 text-white">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/hero.svg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" />
+        <div className="relative mx-auto flex max-w-3xl items-center gap-5 px-4 py-14">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/emblem.svg" alt="" className="h-20 w-auto drop-shadow" />
+          <div>
+            <h1 className="text-4xl font-semibold tracking-tight">{APP_NAME}</h1>
+            <p className="mt-2 max-w-md text-blue-100">Secure communication between residents and their families, approved and monitored by facility staff.</p>
+          </div>
+        </div>
+      </section>
+      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="grid gap-4 sm:grid-cols-3">
         {ENTRIES.map((e) => (
           <Link key={e.href} href={e.href}>
             <Card className="h-full transition hover:border-blue-700">
@@ -24,6 +35,7 @@ export default function Home() {
         ))}
       </div>
       <p className="mt-10 text-xs text-slate-500">Demo environment. All people and booking numbers shown are fictional.</p>
+      </div>
     </main>
   );
 }

@@ -41,6 +41,8 @@ export function KioskLogin() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-6 py-10">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/emblem.svg" alt="" className="mx-auto mb-3 h-20 w-auto" />
       <h1 className="mb-8 text-center text-4xl font-semibold text-blue-900">{APP_NAME}</h1>
       <label className="mb-1 text-xl font-medium" htmlFor="booking">Booking number</label>
       <input

@@ -10,7 +10,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     <div>
       <header className="border-b border-slate-200 bg-slate-900 text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/staff" className="font-semibold">{APP_NAME} <span className="font-normal text-slate-300">· {facility?.name}</span></Link>
+          <Link href="/staff" className="flex items-center gap-2 font-semibold">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/emblem.svg" alt="" className="h-7 w-auto" />{APP_NAME} <span className="font-normal text-slate-300">· {facility?.name}</span></Link>
           <div className="flex items-center gap-4 text-sm text-slate-300">
             <span>{profile.full_name} ({profile.role})</span>
             <SignOut next="/staff/login" className="text-white" />
