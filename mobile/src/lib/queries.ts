@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { MessageStatus, RequestStatus, VisitStatus } from "@shared/status";
+import type { EndReason, MessageStatus, RequestStatus, VisitStatus } from "@shared/status";
 import { supabase } from "./supabase";
 
 // Every query goes through the user's JWT, so the same RLS policies and security-definer functions
@@ -9,7 +9,7 @@ export type Contact = { contact_id: string; name: string; relationship: string }
 export type ConnectionRequest = { id: string; typed_resident_name: string; relationship: string; status: RequestStatus; deny_reason: string | null; created_at: string };
 export type Message = { id: string; sender: "family" | "resident"; body: string; status: MessageStatus; attachment_path: string | null; created_at: string; photo?: string };
 export type Slot = { slot_id: string; starts_at: string; ends_at: string };
-export type Visit = { id: string; status: VisitStatus; contact_id: string; deny_reason: string | null; visit_slots: { starts_at: string; ends_at: string } };
+export type Visit = { id: string; status: VisitStatus; end_reason: EndReason; contact_id: string; deny_reason: string | null; visit_slots: { starts_at: string; ends_at: string } };
 
 async function unwrap<T>(p: PromiseLike<{ data: T | null; error: { message: string } | null }>): Promise<T> {
   const { data, error } = await p;
@@ -23,6 +23,7 @@ export const keys = {
   thread: (contactId: string) => ["thread", contactId] as const,
   visits: ["visits"] as const,
   slots: ["slots"] as const,
+  latestIncoming: ["latest-incoming"] as const,
 };
 
 export const useContacts = () =>
@@ -61,7 +62,7 @@ export const useVisits = () =>
     refetchInterval: 30_000,
     queryFn: async () => {
       await supabase.rpc("expire_visits");
-      const rows = await unwrap<Visit[]>(supabase.from("visits").select("id, status, contact_id, deny_reason, visit_slots(starts_at, ends_at)"));
+      const rows = await unwrap<Visit[]>(supabase.from("visits").select("id, status, end_reason, contact_id, deny_reason, visit_slots(starts_at, ends_at)"));
       return [...rows].sort((a, b) => b.visit_slots.starts_at.localeCompare(a.visit_slots.starts_at));
     },
   });
@@ -75,3 +76,22 @@ export function friendlyError(error: { code?: string; message?: string } | null 
   if (error.code === "P0001" && error.message) return error.message.charAt(0).toUpperCase() + error.message.slice(1) + ".";
   return fallback;
 }
+
+// Newest delivered resident message per contact. RLS only lets a family member see resident messages after
+// staff deliver them, so held messages never count as new.
+export const useLatestIncoming = () =>
+  useQuery({
+    queryKey: keys.latestIncoming,
+    queryFn: async () => {
+      const rows = await unwrap<{ contact_id: string; delivered_at: string | null; created_at: string }[]>(
+        supabase.from("messages").select("contact_id, delivered_at, created_at").eq("sender", "resident").eq("status", "delivered")
+          .order("delivered_at", { ascending: false }).limit(300),
+      );
+      const latest: Record<string, string> = {};
+      for (const r of rows) {
+        const at = r.delivered_at ?? r.created_at;
+        if (!latest[r.contact_id] || at > latest[r.contact_id]) latest[r.contact_id] = at;
+      }
+      return latest;
+    },
+  });

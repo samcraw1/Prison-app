@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActionSheetIOS, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -10,6 +10,7 @@ import { MAX_MESSAGE_CHARS, messageStatusNote } from "@shared/status";
 import { friendlyError, keys, useContacts, useThread, type Message } from "@/lib/queries";
 import { useLiveQuery } from "@/lib/realtime";
 import { useAuth } from "@/lib/auth";
+import { markThreadSeen } from "@/lib/unread";
 import { supabase } from "@/lib/supabase";
 import { pickPhoto, uploadPhoto, type PickedPhoto } from "@/lib/upload";
 import { Empty, ErrorText, LoadError, Loading } from "@/components/ui";
@@ -32,6 +33,11 @@ export default function Thread() {
   const [photo, setPhoto] = useState<PickedPhoto>();
   const [pending, setPending] = useState<Pending[]>([]);
   const [error, setError] = useState<string>();
+
+  // Opening the thread marks its delivered messages as seen on this device (drives the Home "New message" dot).
+  useEffect(() => {
+    if (profile && thread.data) markThreadSeen(profile.id, contactId).catch(() => {});
+  }, [profile, contactId, thread.data]);
 
   const contactName = name ?? contacts.data?.find((c) => c.contact_id === contactId)?.name ?? "Messages";
   const notFound = contacts.isSuccess && !contacts.data.some((c) => c.contact_id === contactId);
