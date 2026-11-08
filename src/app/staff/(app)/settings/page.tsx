@@ -11,7 +11,11 @@ export default async function SettingsPage() {
     supabase.from("facilities").select("settings").single(),
     supabase.from("flag_keywords").select("id, word").order("word"),
   ]);
-  const s = (facility?.settings ?? {}) as { hold_all_messages: boolean; max_visit_minutes: number; max_visits_per_week: number };
+  const s = (facility?.settings ?? {}) as {
+    hold_all_messages: boolean; max_visit_minutes: number; max_visits_per_week: number;
+    message_fee_cents?: number; visit_fee_cents?: number; free_messages_per_week?: number;
+  };
+  const dollars = (c?: number) => ((c ?? 0) / 100).toFixed(2);
   const isAdmin = profile.role === "admin";
 
   return (
@@ -29,6 +33,16 @@ export default async function SettingsPage() {
           </label>
           <Field label="Longest video visit (minutes)" name="max_visit_minutes" type="number" min={5} max={120} defaultValue={s.max_visit_minutes} disabled={!isAdmin} required />
           <Field label="Most visits per resident each week" name="max_visits_per_week" type="number" min={1} max={14} defaultValue={s.max_visits_per_week} disabled={!isAdmin} required />
+          <fieldset className="space-y-4 border-t border-slate-200 pt-4">
+            <legend className="pt-4 font-medium">Prices</legend>
+            <p className="text-sm text-slate-600">
+              Families pay from a prepaid balance. Set 0 for free. Check state rate caps and FCC rules before charging
+              (see docs/PAYMENTS.md). Changes apply to new messages and visit requests only.
+            </p>
+            <Field label="Price per family message ($)" name="message_fee" type="number" min={0} max={5} step="0.01" defaultValue={dollars(s.message_fee_cents)} disabled={!isAdmin} required />
+            <Field label="Free family messages per week" name="free_messages_per_week" type="number" min={0} max={500} defaultValue={s.free_messages_per_week ?? 0} disabled={!isAdmin} required />
+            <Field label="Price per video visit ($)" name="visit_fee" type="number" min={0} max={50} step="0.01" defaultValue={dollars(s.visit_fee_cents)} disabled={!isAdmin} required />
+          </fieldset>
           {isAdmin && <Button type="submit">Save policies</Button>}
         </ActionForm>
       </Card>

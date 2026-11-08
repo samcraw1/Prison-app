@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { EndReason, MessageStatus, RequestStatus, VisitStatus } from "@shared/status";
+import { isInsufficientBalance, type LedgerEntry } from "@shared/payments";
 import { supabase } from "./supabase";
 
 // Every query goes through the user's JWT, so the same RLS policies and security-definer functions
@@ -25,6 +26,9 @@ export const keys = {
   slots: ["slots"] as const,
   latestIncoming: ["latest-incoming"] as const,
   facilities: ["connect-facilities"] as const,
+  balance: ["wallet", "balance"] as const,
+  ledger: ["wallet", "ledger"] as const,
+  prices: (contactId: string) => ["wallet", "prices", contactId] as const,
 };
 
 export const useContacts = () =>
@@ -85,6 +89,7 @@ export const useConnectFacilities = () =>
 export function friendlyError(error: { code?: string; message?: string } | null | undefined, fallback: string) {
   if (!error) return fallback;
   if (error.message?.includes("unavailable")) return "Messaging is not available right now.";
+  if (isInsufficientBalance(error)) return "Your balance is too low for this.";
   if (error.code === "P0001" && error.message) return error.message.charAt(0).toUpperCase() + error.message.slice(1) + ".";
   return fallback;
 }
@@ -106,4 +111,26 @@ export const useLatestIncoming = () =>
       }
       return latest;
     },
+  });
+
+// ------------------------------------------------------------------ balance
+// The balance is computed in the database from the append-only ledger; the app never adds anything up itself.
+export const useBalance = () =>
+  useQuery({ queryKey: keys.balance, queryFn: async () => Number(await unwrap<number>(supabase.rpc("my_balance"))) });
+
+export const useLedger = () =>
+  useQuery({
+    queryKey: keys.ledger,
+    queryFn: () => unwrap<LedgerEntry[]>(
+      supabase.from("ledger_entries").select("id, kind, amount_cents, note, created_at").order("id", { ascending: false }).limit(200),
+    ),
+  });
+
+export type Prices = { message_fee_cents: number; visit_fee_cents: number; free_messages_left: number };
+// Prices set by the contact's (resident's) facility.
+export const useContactPrices = (contactId: string | undefined) =>
+  useQuery({
+    queryKey: keys.prices(contactId ?? ""),
+    enabled: !!contactId,
+    queryFn: async () => (await unwrap<Prices[]>(supabase.rpc("contact_prices", { p_contact: contactId })))[0] ?? null,
   });

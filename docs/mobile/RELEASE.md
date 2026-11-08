@@ -110,4 +110,7 @@ npx eas-cli@latest build --profile production --platform android && npx eas-cli@
 - **Account deletion:** both stores require in-app account deletion for apps with sign-up. Not built yet; see
   "Open items" in `POC-RESULTS.md`.
 - **Permissions text:** camera, microphone, photos and notifications strings are set in `app.config.ts`.
-- **Payments:** none in the app. See `PAYMENTS-POLICY.md` before adding any.
+- **Payments:** the app shows the balance and history. "Add funds" opens Stripe Checkout in the system browser only
+  when `EXPO_PUBLIC_IOS_EXTERNAL_PURCHASE_LINK=us` / `EXPO_PUBLIC_ANDROID_EXTERNAL_PURCHASE_LINK=us` is set for a build
+  that is distributed only where that is allowed; otherwise it says to add funds on the website. Read
+  `../PAYMENTS.md` (store-policy decision and open questions) before turning either flag on.

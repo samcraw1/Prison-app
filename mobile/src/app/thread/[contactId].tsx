@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { ActionSheetIOS, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Haptics from "expo-haptics";
 import { useQueryClient } from "@tanstack/react-query";
 import { MAX_MESSAGE_CHARS, messageStatusNote } from "@shared/status";
-import { friendlyError, keys, useContacts, useThread, type Message } from "@/lib/queries";
+import { friendlyError, keys, useContactPrices, useContacts, useThread, type Message } from "@/lib/queries";
+import { formatCents, isInsufficientBalance } from "@shared/payments";
 import { useLiveQuery } from "@/lib/realtime";
 import { useAuth } from "@/lib/auth";
 import { markThreadSeen } from "@/lib/unread";
@@ -33,6 +34,8 @@ export default function Thread() {
   const [photo, setPhoto] = useState<PickedPhoto>();
   const [pending, setPending] = useState<Pending[]>([]);
   const [error, setError] = useState<string>();
+  const [needsFunds, setNeedsFunds] = useState(false);
+  const prices = useContactPrices(contactId);
 
   // Opening the thread marks its delivered messages as seen on this device (drives the Home "New message" dot).
   useEffect(() => {
@@ -70,13 +73,16 @@ export default function Thread() {
     setBody("");
     setPhoto(undefined);
     setError(undefined);
+    setNeedsFunds(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     try {
       const path = sendingPhoto ? await uploadPhoto("message-attachments", sendingPhoto, profile.facility_id, profile.id) : null;
       const { error: rpcError } = await supabase.rpc("send_message", { p_contact: contactId, p_body: text, p_attachment_path: path });
       if (rpcError) throw rpcError;
       await qc.invalidateQueries({ queryKey: keys.thread(contactId) });
+      if (prices.data?.message_fee_cents) qc.invalidateQueries({ queryKey: ["wallet"] });
     } catch (e) {
+      setNeedsFunds(isInsufficientBalance(e as { code?: string; message?: string }));
       setBody(text);
       setPhoto(sendingPhoto);
       setError(e instanceof Error && e.message.includes("photo") ? e.message : friendlyError(e as { code?: string; message?: string }, "Could not send. Please try again."));
@@ -130,6 +136,11 @@ export default function Thread() {
       )}
       <View style={{ borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.card, padding: space(3), paddingBottom: Math.max(insets.bottom, space(3)), gap: space(2) }}>
         <ErrorText>{error}</ErrorText>
+        {needsFunds && (
+          <Pressable accessibilityRole="button" onPress={() => router.push("/wallet")} hitSlop={8}>
+            <Text style={{ color: colors.primary, fontWeight: "600" }}>View balance</Text>
+          </Pressable>
+        )}
         {photo && (
           <View style={{ flexDirection: "row", alignItems: "center", gap: space(2) }}>
             <Image source={{ uri: photo.uri }} style={{ width: 48, height: 48, borderRadius: 8 }} />
@@ -159,7 +170,10 @@ export default function Thread() {
             <Ionicons name="arrow-up" size={22} color="#fff" />
           </Pressable>
         </View>
-        <Text style={{ fontSize: 12, color: colors.faint, textAlign: "center" }}>All messages are reviewed by facility staff.</Text>
+        <Text style={{ fontSize: 12, color: colors.faint, textAlign: "center" }}>
+          All messages are reviewed by facility staff.
+          {prices.data?.message_fee_cents ? ` Each message costs ${formatCents(prices.data.message_fee_cents)}${prices.data.free_messages_left > 0 ? ` (${prices.data.free_messages_left} free left this week)` : ""}.` : ""}
+        </Text>
       </View>
     </KeyboardAvoidingView>
   );

@@ -51,6 +51,7 @@ export function routeForNotification(data: Record<string, unknown> | undefined):
   if (data.type === "message" && typeof data.contactId === "string") return `/thread/${data.contactId}`;
   if (data.type === "visit") return "/visits";
   if (data.type === "connection") return "/";
+  if (data.type === "wallet") return "/wallet";
   return null;
 }
 

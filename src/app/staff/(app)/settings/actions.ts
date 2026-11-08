@@ -8,6 +8,10 @@ const settingsSchema = z.object({
   hold_all_messages: z.boolean(),
   max_visit_minutes: z.coerce.number().int().min(5).max(120),
   max_visits_per_week: z.coerce.number().int().min(1).max(14),
+  // Rate card, entered in dollars and stored in whole cents (limits match the database check constraint).
+  message_fee_cents: z.coerce.number().min(0).max(5).transform((d) => Math.round(d * 100)),
+  visit_fee_cents: z.coerce.number().min(0).max(50).transform((d) => Math.round(d * 100)),
+  free_messages_per_week: z.coerce.number().int().min(0).max(500),
 });
 
 export async function saveSettings(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -15,6 +19,9 @@ export async function saveSettings(_prev: ActionState, formData: FormData): Prom
     hold_all_messages: formData.get("hold_all_messages") === "on",
     max_visit_minutes: formData.get("max_visit_minutes"),
     max_visits_per_week: formData.get("max_visits_per_week"),
+    message_fee_cents: formData.get("message_fee") ?? 0,
+    visit_fee_cents: formData.get("visit_fee") ?? 0,
+    free_messages_per_week: formData.get("free_messages_per_week") ?? 0,
   });
   if (!parsed.success) return { error: "Please check the numbers and try again." };
 

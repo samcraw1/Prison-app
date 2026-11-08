@@ -1,8 +1,8 @@
 # Payments: store policy notes and recommended design
 
-**Status:** Kinline has no payments today. `src/lib/pricing.ts` returns 0 and `messages.fee_cents` is always 0.
-Nothing in this repo charges users, and the mobile apps contain no purchase flow. This document is input for a
-future decision and **needs review by counsel** before anything is built. Store rules change; verify each point
+**Status:** payments are implemented as described in [`../PAYMENTS.md`](../PAYMENTS.md) (ledger, per-facility prices,
+Stripe deposits on the web, mobile purchase links behind flags that are off by default). This document is the store
+policy background for that design and still **needs review by counsel** before prices are switched on. Store rules change; verify each point
 against the current Apple App Review Guidelines and Google Play Payments policy at decision time.
 
 ## How the store rules likely apply to Kinline
