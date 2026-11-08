@@ -43,7 +43,7 @@ credentials; step-by-step instructions are below.
 (`supabase/realtime:v2.147.1`, from Supabase CLI 3.0.0, the latest) rejects *every* `postgres_changes`
 subscription with `42P10 there is no unique or exclusion constraint matching the ON CONFLICT specification`.
 The image's code does not match its own `realtime.subscription` schema. The error is in Supabase's internal
-`realtime` schema, not in Kinline's tables, and it also happens for a family member's own message. The test
+`realtime` schema, not in ClearLine's tables, and it also happens for a family member's own message. The test
 `realtime respects RLS > delivers a resident message only to that resident's family` fails on it and reports the
 server error. Hosted Supabase runs a maintained Realtime version. **Owner action:** run `npm run test:int` against
 the dev Supabase project, or rerun locally after the next CLI update, to confirm. Until then the website and app

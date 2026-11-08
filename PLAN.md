@@ -1,4 +1,4 @@
-# Kinline MVP — Plan (awaiting approval)
+# ClearLine MVP — Plan (awaiting approval)
 
 Name lives in one config value: `NEXT_PUBLIC_APP_NAME`.
 

@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // The backend has no read receipts, so "new message" is tracked on this device: a thread is unread when its
 // newest delivered resident message arrived after the user last opened that thread here. On first use the
 // baseline is "now", so existing history is not flagged as new. Stores timestamps only, no message content.
-const key = (userId: string) => `kinline.lastSeen.${userId}`;
+const key = (userId: string) => `clearline.lastSeen.${userId}`;
 type Seen = { baseline: string; threads: Record<string, string> };
 
 const listeners = new Set<() => void>();

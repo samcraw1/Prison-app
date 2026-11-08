@@ -1,4 +1,4 @@
-// Kinline brand: navy / blue / white (matches the website's Tailwind blue-800/900 + slate palette).
+// ClearLine brand: navy / blue / white (matches the website's Tailwind blue-800/900 + slate palette).
 export const colors = {
   primary: "#1e40af",
   primaryDark: "#1e3a8a",

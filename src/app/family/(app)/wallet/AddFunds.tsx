@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, ErrorText } from "@/components/ui";
 import { DEPOSIT_AMOUNTS_CENTS, formatCents } from "@shared/payments";
 
-// Sends the browser to Stripe Checkout. Card details are entered on Stripe's page, never on Kinline.
+// Sends the browser to Stripe Checkout. Card details are entered on Stripe's page, never on ClearLine.
 export function AddFunds() {
   const [busy, setBusy] = useState<number>();
   const [error, setError] = useState<string>();
@@ -38,7 +38,7 @@ export function AddFunds() {
         ))}
       </div>
       <ErrorText>{error}</ErrorText>
-      <p className="text-xs text-slate-500">Payments are processed by Stripe. Kinline never sees your card number.</p>
+      <p className="text-xs text-slate-500">Payments are processed by Stripe. ClearLine never sees your card number.</p>
     </div>
   );
 }
