@@ -7,7 +7,7 @@ import { startFakeStripe, type StripeCall } from "./fake-stripe";
 
 // Requires the app on APP_URL started with STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and
 // STRIPE_API_BASE=http://127.0.0.1:4998 (npm run test:int does this).
-const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_kinline_integration";
+const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_clearline_integration";
 const stripe = new Stripe("sk_test_unused");
 
 let server: Server;
@@ -81,7 +81,7 @@ describe("checkout route", () => {
     const call = calls[before];
     const user = await userId(await asFamily(1));
     expect(call.path).toBe("/v1/checkout/sessions");
-    expect(call.auth).toBe(`Bearer ${process.env.STRIPE_SECRET_KEY ?? "sk_test_kinline_integration"}`);
+    expect(call.auth).toBe(`Bearer ${process.env.STRIPE_SECRET_KEY ?? "sk_test_clearline_integration"}`);
     expect(call.form.get("line_items[0][price_data][unit_amount]")).toBe("2500");
     expect(call.form.get("metadata[user_id]")).toBe(user);
     expect(call.form.get("metadata[facility_id]")).toBe(demo);
@@ -104,7 +104,7 @@ describe("checkout route", () => {
   it("app return page hands off to the app deep link", async () => {
     const res = await fetch(`${APP_URL}/api/payments/app-return?status=success`, { redirect: "manual" });
     expect(res.status).toBe(303);
-    expect(res.headers.get("location")).toBe("kinline://wallet?status=success");
+    expect(res.headers.get("location")).toBe("clearline://wallet?status=success");
   });
 });
 

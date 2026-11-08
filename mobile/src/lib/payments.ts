@@ -10,7 +10,7 @@ import { apiPost } from "./api";
 //    default browser, not an in-app WebView). iOS: only for builds distributed on the US storefront, where Apple
 //    allows external purchase links (EXPO_PUBLIC_IOS_EXTERNAL_PURCHASE_LINK=us). Android: off until counsel
 //    confirms Google Play's rules (EXPO_PUBLIC_ANDROID_EXTERNAL_PURCHASE_LINK=us).
-//  * "website_text": plain text telling people they can add funds on the Kinline website. No link or button.
+//  * "website_text": plain text telling people they can add funds on the ClearLine website. No link or button.
 //  * Seam for later: a "store_billing" mode (StoreKit / Play Billing) would validate purchases on the server and
 //    write ledger entries from a store webhook, like the Stripe one. Not implemented.
 export type PurchaseMode = "external_link" | "website_text";
@@ -22,7 +22,7 @@ export function purchaseMode(): PurchaseMode {
   return flag === "us" ? "external_link" : "website_text";
 }
 
-// Opens Stripe Checkout outside the app. Stripe redirects back to kinline://wallet (via /api/payments/app-return);
+// Opens Stripe Checkout outside the app. Stripe redirects back to clearline://wallet (via /api/payments/app-return);
 // the balance itself is read from the database, which the webhook updates.
 export async function openCheckout(amountCents: number): Promise<void> {
   const { url } = await apiPost<{ url: string }>("/api/payments/checkout", {

@@ -13,7 +13,7 @@ import { colors, space, type } from "@/components/theme";
 const when = (iso: string) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 export default function Wallet() {
-  // kinline://wallet?status=success|cancelled when returning from Stripe Checkout.
+  // clearline://wallet?status=success|cancelled when returning from Stripe Checkout.
   const { status } = useLocalSearchParams<{ status?: string }>();
   const qc = useQueryClient();
   const balance = useBalance();
@@ -69,7 +69,7 @@ export default function Wallet() {
       </View>
 
       {mode === "external_link" ? (
-        <Section title="Add funds" footer="Opens a secure Stripe page in your browser. Kinline never sees your card number.">
+        <Section title="Add funds" footer="Opens a secure Stripe page in your browser. ClearLine never sees your card number.">
           <View style={{ padding: space(4), gap: space(3) }}>
             {DEPOSIT_AMOUNTS_CENTS.map((a) => (
               <Button key={a} title={`Add ${formatCents(a)}`} variant="secondary" busy={busy === a} busyTitle="Opening…"
@@ -82,7 +82,7 @@ export default function Wallet() {
         <Section title="Add funds">
           <View style={{ padding: space(4) }}>
             <Text style={[type.subhead, { color: colors.muted, lineHeight: 21 }]}>
-              You can add funds on the Kinline website, signed in with this account. Your balance here updates automatically.
+              You can add funds on the ClearLine website, signed in with this account. Your balance here updates automatically.
             </Text>
           </View>
         </Section>

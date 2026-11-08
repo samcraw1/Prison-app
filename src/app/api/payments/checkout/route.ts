@@ -6,7 +6,7 @@ import { getStripe } from "@/lib/stripe";
 
 const bodySchema = z.object({
   amount_cents: z.number().int().refine((a) => (DEPOSIT_AMOUNTS_CENTS as readonly number[]).includes(a)),
-  // "app": the mobile app opened this in the system browser and wants to be sent back to kinline://wallet.
+  // "app": the mobile app opened this in the system browser and wants to be sent back to clearline://wallet.
   return_to: z.enum(["web", "app"]).default("web"),
   // Lets a client retry the same request without creating a second Checkout Session.
   request_id: z.string().uuid().optional(),
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const session = await stripe.checkout.sessions.create(
       {
         mode: "payment",
-        line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: amount_cents, product_data: { name: "Kinline balance" } } }],
+        line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: amount_cents, product_data: { name: "ClearLine balance" } } }],
         client_reference_id: me.id,
         metadata,
         // Refunds and disputes arrive on the PaymentIntent/charge; the ledger finds the deposit by its id.

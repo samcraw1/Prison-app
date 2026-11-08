@@ -1,4 +1,4 @@
-# Task: Add payments to Kinline (web-first Stripe, mobile per store rules)
+# Task: Add payments to ClearLine (web-first Stripe, mobile per store rules)
 
 Repo: samcraw1/Prison-app, branch off `mobile-poc` (or `main` once PR #1 merges).
 Read first: README.md, docs/mobile/PAYMENTS-POLICY.md, docs/ROSTER.md, docs/mobile/RELEASE.md,
@@ -6,7 +6,7 @@ src/lib/pricing.ts, supabase/migrations/*.sql, mobile/AGENTS.md, AGENTS.md (Next
 read node_modules/next/dist/docs before writing Next code).
 
 ## Context
-Kinline = correctional communications: Next.js 16 web app (family / staff / resident kiosk) on Vercel,
+ClearLine = correctional communications: Next.js 16 web app (family / staff / resident kiosk) on Vercel,
 Expo SDK 55 family app in mobile/, one Supabase backend (Postgres + RLS, security-definer RPCs, Storage).
 Multi-facility: contacts, messages, visits belong to the RESIDENT's facility (contacts.facility_id).
 Today nothing is charged: src/lib/pricing.ts returns 0 and messages.fee_cents is always 0.
@@ -47,7 +47,7 @@ transaction history, consistent across web, iOS and Android. Each facility sets 
      the Thread and Request-visit screens.
    - Purchasing, per store policy. Implement behind a feature flag per platform/region:
      - iOS US: an "Add funds" link that opens Stripe Checkout in the SYSTEM browser (expo-web-browser /
-       Linking), not a WebView, plus a return deep link (kinline://wallet). Follow Apple's external-link
+       Linking), not a WebView, plus a return deep link (clearline://wallet). Follow Apple's external-link
        entitlement and placement rules.
      - Paid video visits: evaluate App Store guideline 3.1.3(d) (real-time person-to-person services may use
        other payment methods). Document the conclusion.

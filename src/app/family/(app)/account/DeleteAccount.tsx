@@ -42,7 +42,7 @@ export function DeleteAccount({ email, balanceLabel, balanceCents, scheduledFor 
         <h2 className="text-lg font-semibold">Deletion scheduled</h2>
         <p className="mt-2 text-slate-700">
           Your account will be deleted on {new Date(scheduledFor).toLocaleDateString(undefined, { dateStyle: "long" })}. Until then you can
-          keep using Kinline. After that your name, email, phone and ID photo are erased and you can&apos;t sign in. Messages and
+          keep using ClearLine. After that your name, email, phone and ID photo are erased and you can&apos;t sign in. Messages and
           visits stay in the facility&apos;s records as &ldquo;Deleted user&rdquo;.
         </p>
         <ErrorText>{error}</ErrorText>

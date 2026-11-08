@@ -81,7 +81,7 @@ export async function syncVisitReminders(visits: { id: string; status: string; v
 }
 
 // Remember "Not now" on the notification prompt so it doesn't reappear every launch (Account still offers it).
-const PROMPT_KEY = "kinline.pushPromptDismissed";
+const PROMPT_KEY = "clearline.pushPromptDismissed";
 export async function pushPromptDismissed() {
   const { default: AsyncStorage } = await import("@react-native-async-storage/async-storage");
   return (await AsyncStorage.getItem(PROMPT_KEY)) === "1";
