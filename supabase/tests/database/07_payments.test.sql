@@ -163,6 +163,22 @@ select is(public.record_stripe_reversal('pi_A1', 'dispute_reinstated', 'du_1', 6
 reset role;
 select is(public.wallet_balance('a1000000-0000-0000-0000-000000000003'), 300::bigint, 'reinstated funds return');
 
+-- Reversal hardening (20261108000004): dp_ ids, and credits only undo debits that were recorded. Each pair nets to zero.
+set local role service_role;
+select is(public.record_stripe_reversal('pi_A1', 'dispute_withdrawn', 'dp_1', 50, 'evt_dp_1'), 'recorded', 'dp_ dispute id accepted');
+select is(public.record_stripe_reversal('pi_A1', 'dispute_reinstated', 'dp_1', 50, 'evt_dp_2'), 'recorded', 'dp_ dispute reinstated');
+select throws_ok($$select public.record_stripe_reversal('pi_A1', 'refund_failed', 're_never', 100, 'evt_f_0')$$,
+  'P0001', null, 'refund_failed without a recorded refund is rejected (Stripe retries)');
+select throws_ok($$select public.record_stripe_reversal('pi_A1', 'dispute_reinstated', 'dp_never', 100, 'evt_r_0')$$,
+  'P0001', null, 'dispute_reinstated without a recorded withdrawal is rejected (Stripe retries)');
+select is(public.record_stripe_reversal('pi_A1', 'refund', 're_3', 100, 'evt_re_3'), 'recorded', 'second card refund recorded');
+select is(public.record_stripe_reversal('pi_A1', 'refund_failed', 're_3', 100, 'evt_f_1'), 'recorded', 'failed refund credits back once its debit exists');
+select is(public.record_stripe_reversal('pi_A1', 'refund_failed', 're_3', 100, 'evt_f_1'), 'duplicate', 'failed refund replay ignored');
+select throws_ok($$select public.record_stripe_reversal('pi_A1', 'bogus', 're_3', 100, 'evt_b_1')$$,
+  '22023', 'unknown reversal kind', 'unknown reversal kind is rejected');
+reset role;
+select is(public.wallet_balance('a1000000-0000-0000-0000-000000000003'), 300::bigint, 'hardening cases net to zero');
+
 -- ---------------------------------------------------------------- immutability
 select throws_ok($$update public.ledger_entries set amount_cents = 100000$$, 'P0001', 'ledger_entries is append-only', 'ledger rows cannot be updated');
 select throws_ok($$delete from public.ledger_entries$$, 'P0001', 'ledger_entries is append-only', 'ledger rows cannot be deleted');
