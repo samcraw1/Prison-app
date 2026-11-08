@@ -65,7 +65,7 @@ const config: ExpoConfig = {
   experiments: { typedRoutes: true },
   extra: {
     appEnv: APP_ENV,
-    eas: { projectId: process.env.EAS_PROJECT_ID },
+    eas: { projectId: process.env.EAS_PROJECT_ID ?? "61d649a8-b39e-43ed-bc75-a286e0218538" },
   },
 };
 
