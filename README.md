@@ -21,7 +21,10 @@ The product name is a placeholder; rename it with one value: `NEXT_PUBLIC_APP_NA
 | Video visits | Staff publish slots; families request; staff approve; weekly-limit and capacity enforcement; browser video via Daily; staff can watch silently and end any live visit; metadata only |
 | Staff console | Dashboard, residents (intake, PIN reset, block contact, suspend), settings, keywords, staff accounts (admin), filterable/exportable audit log |
 
-Out of scope (not built): phone calls, payments, commissary, media store, real ID verification,
+Payments: prepaid family balance with per-facility message and visit prices, Stripe Checkout deposits on the web, refunds
+for undelivered messages and visits that don't happen. See [docs/PAYMENTS.md](docs/PAYMENTS.md).
+
+Out of scope (not built): phone calls, commissary/trust deposits, media store, real ID verification,
 multi-facility billing, jail-management-system integration.
 
 ## Architecture
@@ -100,6 +103,10 @@ npm run dev                   # http://localhost:3000
 | `SUPABASE_SERVICE_ROLE_KEY` | `SERVICE_ROLE_KEY` from `supabase status`. **Server only** |
 | `DAILY_API_KEY` | Daily API key (server only). Without it the app runs but the video join page shows "Video is not set up yet" |
 | `DAILY_API_URL` | Optional override of the Daily REST base URL (used by tests) |
+| `STRIPE_SECRET_KEY` | Stripe secret key (`sk_test_…` until launch). **Server only.** Without it the wallet shows "Adding funds is not available yet" |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret of the `/api/payments/webhook` endpoint (`whsec_…`). **Server only** |
+| `PUBLIC_APP_URL` | Optional public origin for Stripe return URLs (defaults to the request origin) |
+| `STRIPE_API_BASE` | Tests only: points the Stripe SDK at the fake Stripe server. Never set in production |
 
 ### Demo accounts (password `DemoPass!234`)
 
@@ -148,7 +155,7 @@ supabase/migrations/   schema, RLS, functions (one file per build step)
 supabase/tests/        pgTAP tests
 src/app/{family,resident,staff}/   role-specific UIs
 src/app/api/           resident login, family sign-up, visit join/end, audit export
-src/lib/               supabase clients, auth guard, video provider seam, pricing hook, audit helpers
+src/lib/               supabase clients, auth guard, video provider seam, Stripe client, audit helpers
 scripts/seed.ts        demo data (fictional)
 mobile/                Expo family app (iOS + Android), separate package
 shared/                framework-free TS shared by web and mobile (status labels, limits)
@@ -172,5 +179,5 @@ tests/integration/     vitest + fake Daily server
 - **Operations:** scheduled jobs for visit expiry and retention (the MVP closes stale visits opportunistically),
   rate limiting and abuse protection at the edge, realtime updates instead of polling, monitoring and alerting,
   backups and disaster recovery, per-facility time zones, content moderation for photos.
-- **Integrations:** jail management system sync (residents, housing, releases and transfers); payment and pricing
-  (hook: `src/lib/pricing.ts` and `messages.fee_cents`).
+- **Integrations:** jail management system sync (residents, housing, releases and transfers); store billing (StoreKit /
+  Play Billing) if counsel requires it for message fees (see docs/PAYMENTS.md).

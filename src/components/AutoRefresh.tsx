@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type LiveTable = "messages" | "visits" | "connection_requests" | "contacts";
+type LiveTable = "messages" | "visits" | "connection_requests" | "contacts" | "ledger_entries";
 
 // Keeps a server-rendered page current. With `live`, a Supabase Realtime change on those tables (filtered by
 // the viewer's RLS) refreshes the page immediately; polling stays on as a fallback if realtime is unavailable.

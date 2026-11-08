@@ -45,6 +45,7 @@ function RootStack() {
         <Stack.Screen name="thread/[contactId]" options={{ title: "Messages" }} />
         <Stack.Screen name="connect" options={{ title: "Connect with someone", presentation: "modal" }} />
         <Stack.Screen name="request-visit" options={{ title: "Request a visit", presentation: "modal" }} />
+        <Stack.Screen name="wallet" options={{ title: "Balance" }} />
         <Stack.Screen name="visit/[id]" options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }} />
       </Stack.Protected>
     </Stack>

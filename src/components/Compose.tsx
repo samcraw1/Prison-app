@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { isInsufficientBalance } from "@shared/payments";
 
 const TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -13,6 +15,7 @@ export function Compose({ contactId, allowPhoto = false, large = false }: { cont
   const [body, setBody] = useState("");
   const [fileName, setFileName] = useState<string>();
   const [error, setError] = useState<string>();
+  const [needsFunds, setNeedsFunds] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function send() {
@@ -20,6 +23,7 @@ export function Compose({ contactId, allowPhoto = false, large = false }: { cont
     if (!text || busy) return;
     setBusy(true);
     setError(undefined);
+    setNeedsFunds(false);
     const supabase = createClient();
 
     let path: string | null = null;
@@ -45,6 +49,10 @@ export function Compose({ contactId, allowPhoto = false, large = false }: { cont
     const { error: rpcError } = await supabase.rpc("send_message", { p_contact: contactId, p_body: text, p_attachment_path: path });
     setBusy(false);
     if (rpcError) {
+      if (isInsufficientBalance(rpcError)) {
+        setNeedsFunds(true);
+        return setError("Your balance is too low to send this message.");
+      }
       return setError(rpcError.message.includes("unavailable") ? "Messaging is not available right now." : "Could not send. Please try again.");
     }
     setBody("");
@@ -64,7 +72,11 @@ export function Compose({ contactId, allowPhoto = false, large = false }: { cont
         aria-label="Message"
         className={`w-full rounded-xl border-2 border-slate-300 p-3 focus:border-blue-700 focus:outline-none ${large ? "text-2xl" : ""}`}
       />
-      {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
+      {error && (
+        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+          {error} {needsFunds && <Link href="/family/wallet" className="font-medium underline">Add funds</Link>}
+        </p>
+      )}
       <div className="flex items-center gap-3">
         <button
           type="button"

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, ErrorText } from "@/components/ui";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { isInsufficientBalance } from "@shared/payments";
 
 type Opt = { id: string; label: string };
 
@@ -12,6 +14,7 @@ export function RequestVisit({ contacts, slots }: { contacts: Opt[]; slots: Opt[
   const [contactId, setContactId] = useState(contacts[0]?.id ?? "");
   const [slotId, setSlotId] = useState(slots[0]?.id ?? "");
   const [error, setError] = useState<string>();
+  const [needsFunds, setNeedsFunds] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function submit() {
@@ -19,7 +22,8 @@ export function RequestVisit({ contacts, slots }: { contacts: Opt[]; slots: Opt[
     setError(undefined);
     const { error } = await createClient().rpc("request_visit", { p_contact: contactId, p_slot: slotId });
     setBusy(false);
-    if (error) return setError(error.code === "P0001" ? error.message : "Could not request that visit.");
+    setNeedsFunds(isInsufficientBalance(error));
+    if (error) return setError(isInsufficientBalance(error) ? "Your balance is too low to request this visit." : error.code === "P0001" ? error.message : "Could not request that visit.");
     router.refresh();
   }
 
@@ -40,7 +44,7 @@ export function RequestVisit({ contacts, slots }: { contacts: Opt[]; slots: Opt[
           {slots.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
         </select>
       </label>
-      <ErrorText>{error}</ErrorText>
+      <ErrorText>{error}{needsFunds && <> <Link href="/family/wallet" className="font-medium underline">Add funds</Link></>}</ErrorText>
       <Button onClick={submit} disabled={busy}>{busy ? "Sending…" : "Request visit"}</Button>
     </div>
   );

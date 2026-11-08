@@ -11,6 +11,7 @@ export default async function FamilyLayout({ children }: { children: React.React
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link href="/family" className="flex items-center gap-2 font-semibold text-blue-900">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/emblem.svg" alt="" className="h-7 w-auto" />{APP_NAME}</Link>
           <div className="flex items-center gap-4 text-sm text-slate-600">
+            <Link href="/family/wallet" className="text-blue-800 underline">Balance</Link>
             <span>{profile.full_name}</span>
             <SignOut next="/family/login" />
           </div>

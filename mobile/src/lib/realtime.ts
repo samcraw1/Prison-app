@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { supabase } from "./supabase";
 
-type Table = "messages" | "visits" | "connection_requests" | "contacts";
+type Table = "messages" | "visits" | "connection_requests" | "contacts" | "ledger_entries";
 
 // Subscribes to row changes the signed-in user is allowed to see (Realtime applies the same RLS SELECT
 // policies) and refetches the affected queries. Payloads are only used as a signal; data is re-read over RLS.

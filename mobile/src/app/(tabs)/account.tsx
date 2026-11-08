@@ -1,12 +1,14 @@
 import { useCallback, useState } from "react";
 import { Alert, AppState, Linking, ScrollView, Text, View } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import Constants from "expo-constants";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { enablePush, notificationStatus, unregisterPush } from "@/lib/push";
 import { supabase } from "@/lib/supabase";
+import { useBalance } from "@/lib/queries";
+import { formatCents } from "@shared/payments";
 import { Avatar, Badge, Button, Row, Section } from "@/components/ui";
 import { colors, space, type } from "@/components/theme";
 
@@ -25,6 +27,7 @@ export default function Account() {
   const qc = useQueryClient();
   const [push, setPush] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const balance = useBalance();
 
   // Re-read permission when the tab gains focus or the app returns from Settings.
   useFocusEffect(useCallback(() => {
@@ -59,6 +62,16 @@ export default function Account() {
           accessibilityLabel={`Signed in as ${profile?.full_name}, ${profile?.email}`}
         />
         <Row divider title="Website access" subtitle="Use the same email and password on the Kinline website." left={<Icon name="globe-outline" />} />
+      </Section>
+
+      <Section title="Balance">
+        <Row
+          title="Balance and history"
+          left={<Icon name="wallet-outline" />}
+          right={balance.data !== undefined ? <Text style={[type.subhead, { color: colors.muted }]}>{formatCents(balance.data)}</Text> : undefined}
+          accessibilityLabel={`Balance${balance.data !== undefined ? ` ${formatCents(balance.data)}` : ""}`}
+          onPress={() => router.push("/wallet")}
+        />
       </Section>
 
       <Section

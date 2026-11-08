@@ -3,7 +3,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQueryClient } from "@tanstack/react-query";
-import { keys, useContacts, useSlots } from "@/lib/queries";
+import { keys, useContactPrices, useContacts, useSlots } from "@/lib/queries";
+import { formatCents, isInsufficientBalance } from "@shared/payments";
 import { supabase } from "@/lib/supabase";
 import { Button, Card, Empty, ErrorText, LoadError, Loading, Muted } from "@/components/ui";
 import { colors, space } from "@/components/theme";
@@ -24,6 +25,8 @@ export default function RequestVisit() {
   const [contactId, setContactId] = useState<string>();
   const who = contactId ?? contacts.data?.[0]?.contact_id;
   const slots = useSlots(who);
+  const prices = useContactPrices(who);
+  const [needsFunds, setNeedsFunds] = useState(false);
   const [slotId, setSlotId] = useState<string>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -40,7 +43,9 @@ export default function RequestVisit() {
     if (!who || !when) return;
     const { error: rpcError } = await supabase.rpc("request_visit", { p_contact: who, p_slot: when });
     setBusy(false);
-    if (rpcError) return setError(rpcError.code === "P0001" ? rpcError.message : "Could not request that visit.");
+    setNeedsFunds(isInsufficientBalance(rpcError));
+    if (rpcError) return setError(isInsufficientBalance(rpcError) ? "Your balance is too low to request this visit." : rpcError.code === "P0001" ? rpcError.message : "Could not request that visit.");
+    qc.invalidateQueries({ queryKey: ["wallet"] });
     await qc.invalidateQueries({ queryKey: keys.visits });
     await qc.invalidateQueries({ queryKey: keys.slots });
     router.back();
@@ -65,6 +70,12 @@ export default function RequestVisit() {
       </Card>
       <View style={{ gap: space(2) }}>
         <ErrorText>{error}</ErrorText>
+        {needsFunds && <Button title="View balance" variant="secondary" onPress={() => router.push("/wallet")} />}
+        {prices.data?.visit_fee_cents ? (
+          <Muted style={{ textAlign: "center" }}>
+            This visit costs {formatCents(prices.data.visit_fee_cents)}, refunded if it isn&apos;t approved or doesn&apos;t take place.
+          </Muted>
+        ) : null}
         <Button title="Request visit" busy={busy} busyTitle="Sending…" onPress={submit} disabled={!when} />
         <Muted style={{ textAlign: "center" }}>Facility staff approve each visit. Visits may be monitored.</Muted>
       </View>
