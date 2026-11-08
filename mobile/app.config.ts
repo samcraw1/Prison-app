@@ -20,7 +20,7 @@ const config: ExpoConfig = {
       NSCameraUsageDescription: "SecureVisit uses your camera for video visits and to photograph your ID for connection requests.",
       NSMicrophoneUsageDescription: "SecureVisit uses your microphone so you can talk during video visits.",
       NSPhotoLibraryUsageDescription: "SecureVisit lets you choose photos to send in messages and an ID photo for connection requests.",
-      UIBackgroundModes: ["voip", "audio", "remote-notification"],
+      UIBackgroundModes: ["audio", "remote-notification"],
       ITSAppUsesNonExemptEncryption: false,
     },
   },

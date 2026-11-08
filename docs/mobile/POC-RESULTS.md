@@ -76,7 +76,7 @@ Prerequisites: `DAILY_API_KEY` set for the web app; a development build installe
    within a few seconds.
 5. **Time limit:** create a 3-minute slot and join. Expect the countdown to turn red at 1:00, and the call to end
    with "Time is up" at 0:00, even if the phone is locked or backgrounded.
-6. **Background/lock:** during a call, lock the phone for 30 s. Audio should continue (iOS `voip`/`audio` modes;
+6. **Background/lock:** during a call, lock the phone for 30 s. Audio should continue (iOS `audio` mode;
    Android foreground service notification).
 7. Repeat steps 2–6 on the Android phone.
 8. **Push:** with the dev build, allow notifications. As staff, approve a resident message to family1. The phone
