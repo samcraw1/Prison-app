@@ -169,7 +169,29 @@ async function main() {
   await log("message.approve", "message", { note: "seeded" });
   await log("visit.approve", "visit", { note: "seeded" });
 
-  console.log("Seeded demo-county.");
+  // ---- second facility (multi-facility demo): its own staff and roster, no families of its own.
+  // Families from demo-county can request connections here; this facility's staff review them.
+  const riverside = await must(
+    admin.from("facilities").insert({ name: "Riverside Detention Center (fictional)", slug: "riverside" }).select("id").single(),
+    "facility riverside",
+  );
+  await createUser(riverside!.id, "staff", "staff@riverside.test", DEMO_PASSWORD, "Quinn Sample");
+  for (const r of [
+    { name: "Jamie Example", booking: "RIV-2001", unit: "East-1", external: "RIVJMS-501" },
+    { name: "Avery Sample", booking: "RIV-2002", unit: "East-4", external: "RIVJMS-502" },
+  ]) {
+    const uid = await createUser(riverside!.id, "resident", `${r.booking.toLowerCase()}@residents.kinline.test`, DEMO_PIN, r.name);
+    await must(
+      admin.from("residents").insert({
+        facility_id: riverside!.id, user_id: uid, booking_number: r.booking, full_name: r.name, housing_unit: r.unit,
+        external_id: r.external, admission_date: "2026-10-01", must_change_pin: false,
+      }),
+      `resident ${r.booking}`,
+    );
+  }
+
+  console.log("Seeded demo-county and riverside.");
+  console.log(`Riverside: staff@riverside.test (${DEMO_PASSWORD}); residents RIV-2001 Jamie Example, RIV-2002 Avery Sample`);
   console.log(`Staff:    staff@demo-county.test / admin@demo-county.test  (${DEMO_PASSWORD})`);
   console.log(`Family:   family1..5@example.test (${DEMO_PASSWORD})`);
   console.log(`Resident: booking DEMO-1001..1005, PIN ${DEMO_PIN}`);

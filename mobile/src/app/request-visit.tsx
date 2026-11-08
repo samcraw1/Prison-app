@@ -21,23 +21,23 @@ function Choice({ label, selected, onPress }: { label: string; selected: boolean
 export default function RequestVisit() {
   const qc = useQueryClient();
   const contacts = useContacts();
-  const slots = useSlots();
   const [contactId, setContactId] = useState<string>();
+  const who = contactId ?? contacts.data?.[0]?.contact_id;
+  const slots = useSlots(who);
   const [slotId, setSlotId] = useState<string>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
 
-  if (contacts.isPending || slots.isPending) return <Loading />;
+  if (contacts.isPending || (who && slots.isPending)) return <Loading />;
   if (contacts.isError || slots.isError) return <LoadError onRetry={() => { contacts.refetch(); slots.refetch(); }} />;
   if (!contacts.data.length) return <Empty title="No approved connections" body="You need an approved connection before you can request a visit." />;
-  if (!slots.data.length) return <Empty title="No visit times open" body="Please check back later." />;
-
-  const who = contactId ?? contacts.data[0].contact_id;
-  const when = slotId ?? slots.data[0].slot_id;
+  const slotList = slots.data ?? [];
+  const when = slotId && slotList.some((s) => s.slot_id === slotId) ? slotId : slotList[0]?.slot_id;
 
   async function submit() {
     setBusy(true);
     setError(undefined);
+    if (!who || !when) return;
     const { error: rpcError } = await supabase.rpc("request_visit", { p_contact: who, p_slot: when });
     setBusy(false);
     if (rpcError) return setError(rpcError.code === "P0001" ? rpcError.message : "Could not request that visit.");
@@ -51,12 +51,13 @@ export default function RequestVisit() {
       {contacts.data.length > 1 && (
         <Card>
           <Text style={{ fontSize: 17, fontWeight: "600", color: colors.text }}>Who are you visiting?</Text>
-          {contacts.data.map((c) => <Choice key={c.contact_id} label={c.name} selected={who === c.contact_id} onPress={() => setContactId(c.contact_id)} />)}
+          {contacts.data.map((c) => <Choice key={c.contact_id} label={c.name} selected={who === c.contact_id} onPress={() => { setContactId(c.contact_id); setSlotId(undefined); }} />)}
         </Card>
       )}
       <Card>
         <Text style={{ fontSize: 17, fontWeight: "600", color: colors.text }}>Pick a time</Text>
-        {slots.data.map((s) => {
+        {slotList.length === 0 && <Muted style={{ marginTop: space(2) }}>No visit times are open at this facility right now. Please check back later.</Muted>}
+        {slotList.map((s) => {
           const mins = Math.round((new Date(s.ends_at).getTime() - new Date(s.starts_at).getTime()) / 60000);
           const label = `${new Date(s.starts_at).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} (${mins} min)`;
           return <Choice key={s.slot_id} label={label} selected={when === s.slot_id} onPress={() => setSlotId(s.slot_id)} />;
@@ -64,7 +65,7 @@ export default function RequestVisit() {
       </Card>
       <View style={{ gap: space(2) }}>
         <ErrorText>{error}</ErrorText>
-        <Button title="Request visit" busy={busy} busyTitle="Sending…" onPress={submit} />
+        <Button title="Request visit" busy={busy} busyTitle="Sending…" onPress={submit} disabled={!when} />
         <Muted style={{ textAlign: "center" }}>Facility staff approve each visit. Visits may be monitored.</Muted>
       </View>
     </ScrollView>

@@ -24,6 +24,7 @@ export const keys = {
   visits: ["visits"] as const,
   slots: ["slots"] as const,
   latestIncoming: ["latest-incoming"] as const,
+  facilities: ["connect-facilities"] as const,
 };
 
 export const useContacts = () =>
@@ -67,7 +68,18 @@ export const useVisits = () =>
     },
   });
 
-export const useSlots = () => useQuery({ queryKey: keys.slots, queryFn: () => unwrap<Slot[]>(supabase.rpc("list_open_slots")) });
+// Open slots at the chosen contact's facility (contacts can be at different facilities).
+export const useSlots = (contactId: string | undefined) =>
+  useQuery({
+    queryKey: [...keys.slots, contactId],
+    enabled: !!contactId,
+    queryFn: () => unwrap<Slot[]>(supabase.rpc("list_open_slots_for_contact", { p_contact: contactId })),
+  });
+
+export type Facility = { id: string; name: string; slug: string };
+// Facilities a family can connect with (names only).
+export const useConnectFacilities = () =>
+  useQuery({ queryKey: keys.facilities, staleTime: 10 * 60_000, queryFn: () => unwrap<Facility[]>(supabase.rpc("list_connect_facilities")) });
 
 // Maps database errors to the same plain-language messages the website shows.
 export function friendlyError(error: { code?: string; message?: string } | null | undefined, fallback: string) {
