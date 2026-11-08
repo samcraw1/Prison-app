@@ -1,4 +1,4 @@
-# ClearLine mobile: build, test and release
+# SecureVisit mobile: build, test and release
 
 The family app lives in `mobile/` (Expo SDK 58, Expo Router). It shares the backend with the website:
 same Supabase project (Auth, Postgres + RLS, Storage, Realtime) and the same Next.js API routes on Vercel.
@@ -18,7 +18,7 @@ Android app (Expo)        ─┘    Next API routes (/api/visits/:id/join|end, /
 | Supabase | local (`npx supabase start`) or a dev project | dev/staging project | prod project |
 | Web | `npm run dev` | Vercel Preview deployments | Vercel Production |
 | Mobile build | `eas build --profile development` or `npx expo run:ios` | `eas build --profile preview` → TestFlight / Play internal | `eas build --profile production` |
-| Bundle id | `com.clearline.app.development` | `com.clearline.app.preview` | `com.clearline.app` |
+| Bundle id | `com.securevisit.mobile.development` | `com.securevisit.mobile.preview` | `com.securevisit.mobile` |
 
 Each environment's mobile build points at that environment's Supabase and web API through EAS environment
 variables (set them in the EAS dashboard or with `eas env:create`):
@@ -30,7 +30,7 @@ variables (set them in the EAS dashboard or with `eas env:create`):
 | `EXPO_PUBLIC_API_URL` | plain text | website origin, e.g. `https://kinline-eight.vercel.app` |
 | `EXPO_PUBLIC_DEFAULT_FACILITY` | plain text | facility slug for sign-up |
 | `EAS_PROJECT_ID` | plain text | from `eas init`; needed for push tokens |
-| `IOS_BUNDLE_ID` / `ANDROID_PACKAGE` | plain text | optional overrides of `com.clearline.app` |
+| `IOS_BUNDLE_ID` / `ANDROID_PACKAGE` | plain text | optional overrides of `com.securevisit.mobile` |
 | `GOOGLE_SERVICES_JSON` | file secret | Firebase config for Android push |
 
 Never add the Supabase service-role key, `DAILY_API_KEY` or `PUSH_DISPATCH_SECRET` to the mobile app or EAS
@@ -71,10 +71,10 @@ Checks before committing: `cd mobile && npx tsc --noEmit && npx expo lint`; at t
 
 ## Accounts you need (owner action)
 
-- Apple Developer Program membership; an App Store Connect app record for `com.clearline.app`.
-- Google Play Console account; a Play app for `com.clearline.app`.
+- Apple Developer Program membership; an App Store Connect app record for `com.securevisit.mobile`.
+- Google Play Console account; a Play app for `com.securevisit.mobile`.
 - Expo account; run `cd mobile && npx eas-cli@latest init` to create the EAS project and get `EAS_PROJECT_ID`.
-- Firebase project (Android push): add an Android app `com.clearline.app`, download `google-services.json`, upload it
+- Firebase project (Android push): add an Android app `com.securevisit.mobile`, download `google-services.json`, upload it
   as the `GOOGLE_SERVICES_JSON` file variable, and upload the FCM V1 service-account key with `eas credentials`.
 - APNs: `eas credentials` creates and stores the push key automatically on the first iOS build.
 - Daily account with `DAILY_API_KEY` set on Vercel (already required by the website).
@@ -102,7 +102,7 @@ npx eas-cli@latest build --profile production --platform android && npx eas-cli@
 ## Store review checklist
 
 - **Demo account for reviewers:** a family account on the production facility with one approved connection and
-  a scheduled visit slot staffed during review hours; explain in review notes that ClearLine connects families with
+  a scheduled visit slot staffed during review hours; explain in review notes that SecureVisit connects families with
   people in a correctional facility, that all messages are reviewed by staff, and that visits are monitored.
 - **Apple privacy labels / Google data safety:** collected: name, email, phone, photos (ID and message attachments),
   messages, audio/video during visits (not recorded), device push token. Linked to identity; not used for tracking;

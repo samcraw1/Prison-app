@@ -4,5 +4,5 @@ import { NextResponse } from "next/server";
 // to the app's deep link. The app re-reads its balance from the database; this carries no payment data.
 export function GET(req: Request) {
   const status = new URL(req.url).searchParams.get("status") === "success" ? "success" : "cancelled";
-  return NextResponse.redirect(`clearline://wallet?status=${status}`, 303);
+  return NextResponse.redirect(`securevisit://wallet?status=${status}`, 303);
 }

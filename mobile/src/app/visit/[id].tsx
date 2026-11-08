@@ -70,7 +70,7 @@ export default function VisitCall() {
       .on("track-stopped", refresh)
       .on("left-meeting", () => finish())
       .on("error", (e) => finish(END_MESSAGES[e?.error?.type ?? ""] ?? "The call was disconnected."))
-      .on("camera-error", () => setError("ClearLine can't use your camera or microphone. Allow access in Settings to see and hear each other."));
+      .on("camera-error", () => setError("SecureVisit can't use your camera or microphone. Allow access in Settings to see and hear each other."));
 
     (async () => {
       try {

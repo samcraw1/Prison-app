@@ -4,7 +4,7 @@ import { admin, facilityId, signIn, tinyPng, url } from "./helpers";
 import { APP_URL } from "./app";
 
 // The app must be started with CRON_SECRET (npm run test:int does this).
-const CRON_SECRET = process.env.CRON_SECRET ?? "cron_clearline_integration";
+const CRON_SECRET = process.env.CRON_SECRET ?? "cron_securevisit_integration";
 const EMAIL = `delete-me-${Date.now()}@example.test`;
 const PASSWORD = "DeleteMe!234";
 let uid: string;

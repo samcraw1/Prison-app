@@ -57,7 +57,7 @@ function DeleteAccount({ email, balance }: { email?: string; balance?: number })
 
   if (deletion.data) {
     return (
-      <Section title="Delete account" footer="Until then you can keep using ClearLine. After that your name, email, phone and ID photo are erased and you can't sign in. Messages and visits stay in the facility's records as “Deleted user”.">
+      <Section title="Delete account" footer="Until then you can keep using SecureVisit. After that your name, email, phone and ID photo are erased and you can't sign in. Messages and visits stay in the facility's records as “Deleted user”.">
         <Row title={`Deletion scheduled for ${day(deletion.data)}`} left={<Icon name="trash-outline" />} />
         <View style={{ padding: space(4) }}>
           <Button title="Keep my account" variant="secondary" busy={busy} busyTitle="Cancelling…" onPress={cancel} />
@@ -127,7 +127,7 @@ export default function Account() {
           left={<Avatar name={profile?.full_name ?? ""} size={48} />}
           accessibilityLabel={`Signed in as ${profile?.full_name}, ${profile?.email}`}
         />
-        <Row divider title="Website access" subtitle="Use the same email and password on the ClearLine website." left={<Icon name="globe-outline" />} />
+        <Row divider title="Website access" subtitle="Use the same email and password on the SecureVisit website." left={<Icon name="globe-outline" />} />
       </Section>
 
       <Section title="Balance">

@@ -6,28 +6,28 @@ const APP_ENV = process.env.APP_ENV ?? "development";
 const suffix = APP_ENV === "production" ? "" : `.${APP_ENV}`;
 
 const config: ExpoConfig = {
-  name: APP_ENV === "production" ? "ClearLine" : `ClearLine (${APP_ENV})`,
-  slug: "clearline",
-  scheme: "clearline",
+  name: APP_ENV === "production" ? "SecureVisit" : `SecureVisit (${APP_ENV})`,
+  slug: "securevisit",
+  scheme: "securevisit",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
   ios: {
-    bundleIdentifier: (process.env.IOS_BUNDLE_ID ?? "com.clearline.app") + suffix,
+    bundleIdentifier: (process.env.IOS_BUNDLE_ID ?? "com.securevisit.mobile") + suffix,
     supportsTablet: false,
     infoPlist: {
-      NSCameraUsageDescription: "ClearLine uses your camera for video visits and to photograph your ID for connection requests.",
-      NSMicrophoneUsageDescription: "ClearLine uses your microphone so you can talk during video visits.",
-      NSPhotoLibraryUsageDescription: "ClearLine lets you choose photos to send in messages and an ID photo for connection requests.",
+      NSCameraUsageDescription: "SecureVisit uses your camera for video visits and to photograph your ID for connection requests.",
+      NSMicrophoneUsageDescription: "SecureVisit uses your microphone so you can talk during video visits.",
+      NSPhotoLibraryUsageDescription: "SecureVisit lets you choose photos to send in messages and an ID photo for connection requests.",
       UIBackgroundModes: ["voip", "audio", "remote-notification"],
       ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {
-    package: (process.env.ANDROID_PACKAGE ?? "com.clearline.app") + suffix,
+    package: (process.env.ANDROID_PACKAGE ?? "com.securevisit.mobile") + suffix,
     adaptiveIcon: {
-      backgroundColor: "#1e40af",
+      backgroundColor: "#FFFFFF",
       foregroundImage: "./assets/android-icon-foreground.png",
       backgroundImage: "./assets/android-icon-background.png",
       monochromeImage: "./assets/android-icon-monochrome.png",
@@ -53,8 +53,8 @@ const config: ExpoConfig = {
     [
       "expo-image-picker",
       {
-        photosPermission: "ClearLine lets you choose photos to send in messages and an ID photo for connection requests.",
-        cameraPermission: "ClearLine uses your camera to photograph your ID for connection requests.",
+        photosPermission: "SecureVisit lets you choose photos to send in messages and an ID photo for connection requests.",
+        cameraPermission: "SecureVisit uses your camera to photograph your ID for connection requests.",
         microphonePermission: false,
       },
     ],
