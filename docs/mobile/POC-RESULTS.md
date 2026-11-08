@@ -6,8 +6,8 @@ credentials; step-by-step instructions are below.
 
 | # | Check | Result |
 |---|---|---|
-| 1 | Same Supabase account on mobile and web | SIM_RESULT_1 |
-| 2 | Messages sync in real time between mobile, web and the staff queue | SIM_RESULT_2 |
+| 1 | Same Supabase account on mobile and web | **Verified**: `family1` signs in on the iOS simulator and sees the same contacts, visits and requests as on the website; the integration tests use the same accounts through both clients |
+| 2 | Messages sync in real time between mobile, web and the staff queue | Sync **verified**: a message sent with a family token lands in the staff queue, the website and the app. **Instant** realtime delivery is **blocked locally** by the Supabase Realtime image bug below; until then the app polls every 20 s. Confirm against hosted Supabase |
 | 3 | Daily video: join, staff monitoring, staff ending the visit, time limit | Server side **verified** (integration tests). Native call on a physical device: **pending (owner)**, needs `DAILY_API_KEY` and two phones |
 | 4 | RLS, security-definer functions and Bearer auth are secure | **Verified**: pgTAP 151/151, Bearer and secret-scan integration tests pass |
 | 5 | Push notifications without sensitive resident information | Payload privacy **verified** (pgTAP). Delivery to a device: **pending (owner)**, needs EAS project + APNs/FCM |
@@ -50,7 +50,15 @@ the dev Supabase project, or rerun locally after the next CLI update, to confirm
 fall back to polling: the thread every 20 s on mobile and 10 s on web, visits every 30 s, plus pull-to-refresh and
 refetch when the app returns to the foreground. So nothing is broken, only slower.
 
-SIM_SECTION
+**iOS simulator (Expo SDK 55, iPhone 17 Pro, iOS 26.2), 2026-11-08: verified.**
+- The development build compiles and runs. SDK 58 needs Xcode 26.4 or newer; this Mac has 26.3, hence SDK 55.
+- Signed in as `family1`. Home, Visits and Account render with real data. The visit status reads "Ready to join" in
+  the join window and "Ended by staff" after staff end it.
+- Connect: the facility picker lists both seeded facilities. Checking `Avery Sample / RIV-2002` at Riverside returns
+  "Details confirmed" and opens the relationship and ID-photo step. A Riverside contact (Jamie Example) appears
+  alongside the home-facility contact.
+- Not checked on screen: the video call (the simulator has no camera) and push delivery (simulators can't receive
+  remote pushes).
 
 ## Physical-device checklist (owner)
 
@@ -79,10 +87,9 @@ Record results in this file. If any step fails, note the device model and OS ver
 
 ## Known gaps and decisions for you
 
-- **Daily's Expo config plugin** (`@daily-co/config-plugin-rn-daily-js` 0.0.13) declares support only for
-  Expo SDK 55–57. This app uses SDK 58, so the plugin's job is done in `app.config.ts` plus a small local plugin
-  (`mobile/plugins/withDailyNative.js`, which adds the Android foreground service). Device testing (above) is the
-  gate. If Daily ships an SDK 58 plugin, switch to it.
+- **Expo SDK 55** (React Native 0.83) is used because SDK 56–58 require Xcode 26.4 or newer. Daily's official Expo
+  plugin supports SDK 55, so it is used directly. Plan the upgrade to SDK 58 once the Mac is on Xcode 26.4.1 or
+  newer; EAS cloud builds don't depend on the local Xcode.
 - **Account deletion:** Apple and Google require in-app account deletion for apps that allow sign-up. Correctional
   record retention may conflict with deleting data. Decide the policy (for example, deactivate the account and
   erase personal data where the facility's retention rules allow it). It is not built yet.
