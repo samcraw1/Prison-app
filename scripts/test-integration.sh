@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 PORT=3101
 # Fake Stripe (tests/integration/fake-stripe.ts) and test-only webhook secret; never real keys.
+export CRON_SECRET=cron_kinline_integration
 export STRIPE_SECRET_KEY=sk_test_kinline_integration STRIPE_WEBHOOK_SECRET=whsec_kinline_integration STRIPE_API_BASE=http://127.0.0.1:4998
 DAILY_API_KEY=test DAILY_API_URL=http://127.0.0.1:4999 npx next dev -p $PORT > /tmp/kinline-int-dev.log 2>&1 &
 PID=$!
