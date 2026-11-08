@@ -59,7 +59,8 @@ const config: ExpoConfig = {
       },
     ],
     ["expo-build-properties", { android: { minSdkVersion: 24 } }],
-    "./plugins/withDailyNative",
+    // Daily's plugin adds the native WebRTC setup, permissions and the Android ongoing-call foreground service.
+    ["@daily-co/config-plugin-rn-daily-js", { enableCamera: true, enableMicrophone: true, enableScreenShare: false }],
   ],
   experiments: { typedRoutes: true },
   extra: {
