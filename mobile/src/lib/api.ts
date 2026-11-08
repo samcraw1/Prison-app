@@ -7,7 +7,7 @@ export class ApiError extends Error {
   }
 }
 
-// Calls the ClearLine web API (Next.js route handlers) as the signed-in user.
+// Calls the SecureVisit web API (Next.js route handlers) as the signed-in user.
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -22,7 +22,7 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError("Can't reach ClearLine. Check your connection and try again.", 0);
+    throw new ApiError("Can't reach SecureVisit. Check your connection and try again.", 0);
   }
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new ApiError(json.error ?? "Something went wrong. Please try again.", res.status, json.code);

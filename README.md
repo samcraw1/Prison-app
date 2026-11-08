@@ -1,4 +1,4 @@
-# ClearLine
+# SecureVisit
 
 A demo-ready MVP of a correctional communications platform: families and residents (incarcerated people) exchange
 reviewed messages and scheduled video visits, and facility staff approve, monitor and audit everything.
@@ -96,7 +96,7 @@ npm run dev                   # http://localhost:3000
 
 | Variable | Value |
 |---|---|
-| `NEXT_PUBLIC_APP_NAME` | Display name (default `ClearLine`) |
+| `NEXT_PUBLIC_APP_NAME` | Display name (default `SecureVisit`) |
 | `NEXT_PUBLIC_DEFAULT_FACILITY` | Facility slug used by sign-up and the kiosk (`demo-county`) |
 | `NEXT_PUBLIC_SUPABASE_URL` | `http://127.0.0.1:54321` locally |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `ANON_KEY` from `supabase status` |

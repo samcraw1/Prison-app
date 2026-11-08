@@ -29,7 +29,7 @@ flowchart LR
 | Stripe client (server only) | `src/lib/stripe.ts` |
 | Checkout (cookie **or** Bearer auth) | `src/app/api/payments/checkout/route.ts` |
 | Webhook (signature-verified) | `src/app/api/payments/webhook/route.ts` |
-| App return hop (`https` → `clearline://wallet`) | `src/app/api/payments/app-return/route.ts` |
+| App return hop (`https` → `securevisit://wallet`) | `src/app/api/payments/app-return/route.ts` |
 | Web wallet | `src/app/family/(app)/wallet/` |
 | Staff rate card | `src/app/staff/(app)/settings/` |
 | Mobile wallet, purchase-mode flag | `mobile/src/app/wallet.tsx`, `mobile/src/lib/payments.ts` |
@@ -115,7 +115,7 @@ Free messages carry no fee, so nothing is refunded for them.
    authenticates the cookie **or** `Authorization: Bearer` (via `getRequestAuth`), requires an active family
    account, and creates a Checkout Session with `metadata` and `payment_intent_data.metadata` =
    `{ user_id, facility_id, kind: "deposit" }` and an idempotency key `deposit:<user>:<amount>:<request_id>`.
-2. The family pays on Stripe's page. **No card data touches ClearLine servers or the apps.**
+2. The family pays on Stripe's page. **No card data touches SecureVisit servers or the apps.**
 3. `POST /api/payments/webhook` verifies the `Stripe-Signature` against the raw body, then:
 
 | Event | Effect |
@@ -136,7 +136,7 @@ balance to my card" flow yet (see open questions).
 
 ### Mobile
 
-- **Wallet** screen (`/wallet`, from Account → Balance, deep link `clearline://wallet`, and the "Funds added" push):
+- **Wallet** screen (`/wallet`, from Account → Balance, deep link `securevisit://wallet`, and the "Funds added" push):
   balance, history over RLS, Realtime refresh, refetch when the app returns to the foreground.
 - Insufficient-balance states in the thread composer and the visit request form, with a "View balance" link, and
   prices shown inline.
@@ -144,8 +144,8 @@ balance to my card" flow yet (see open questions).
 
 | Flag | Value | Behaviour |
 |---|---|---|
-| `EXPO_PUBLIC_IOS_EXTERNAL_PURCHASE_LINK` | `us` | "Add funds" buttons call the checkout API (`return_to: "app"`) and open Stripe Checkout in **Safari** via `Linking.openURL` (not a WebView or in-app browser). Stripe returns to `https://…/api/payments/app-return`, which redirects to `clearline://wallet`. |
-| (unset) | | Text only: "You can add funds on the ClearLine website…" No link, no button. |
+| `EXPO_PUBLIC_IOS_EXTERNAL_PURCHASE_LINK` | `us` | "Add funds" buttons call the checkout API (`return_to: "app"`) and open Stripe Checkout in **Safari** via `Linking.openURL` (not a WebView or in-app browser). Stripe returns to `https://…/api/payments/app-return`, which redirects to `securevisit://wallet`. |
+| (unset) | | Text only: "You can add funds on the SecureVisit website…" No link, no button. |
 | `EXPO_PUBLIC_ANDROID_EXTERNAL_PURCHASE_LINK` | `us` | Same as iOS. **Leave unset** until counsel confirms Google Play's rules. |
 
   The app never holds Stripe keys; it only calls our API with the user's Supabase access token.
@@ -165,7 +165,7 @@ against the current App Review Guidelines and Google Play Payments policy before
 | See balance / history | Yes | Yes | Yes | Yes |
 
 **Paid video visits and guideline 3.1.3(d).** Apple lets apps use payment methods other than in-app purchase for
-*real-time person-to-person services between two individuals*. A ClearLine video visit is a live one-to-one call
+*real-time person-to-person services between two individuals*. A SecureVisit video visit is a live one-to-one call
 between a family member and a resident, so the visit fee itself plausibly qualifies. **Conclusion:** we do not
 rely on 3.1.3(d) yet, because the balance is a single prepaid wallet that also pays for **messages**, which are
 asynchronous and therefore not covered (Apple treats non-real-time person-to-person services as digital content
@@ -222,14 +222,14 @@ npm run test:db      # pgTAP, includes 07_payments (ledger immutability, RLS, ch
 npm run test:int     # integration, includes payments.test.ts against a fake Stripe server
 ```
 
-`npm run test:int` starts the app with `STRIPE_SECRET_KEY=sk_test_clearline_integration`,
-`STRIPE_WEBHOOK_SECRET=whsec_clearline_integration` and `STRIPE_API_BASE` pointing at
+`npm run test:int` starts the app with `STRIPE_SECRET_KEY=sk_test_securevisit_integration`,
+`STRIPE_WEBHOOK_SECRET=whsec_securevisit_integration` and `STRIPE_API_BASE` pointing at
 `tests/integration/fake-stripe.ts`. Webhook tests sign payloads with the SDK's test-header helper, so the real
 verification code runs.
 
 ## Compliance: verify per facility before charging
 
-ClearLine does not encode any of these rules. Each needs a decision, per facility and state, before prices go above 0:
+SecureVisit does not encode any of these rules. Each needs a decision, per facility and state, before prices go above 0:
 
 - **FCC rules for incarcerated people's communication services (IPCS).** The FCC's rules under the Martha Wright-Reed
   Act cover audio and video communications and set rate caps and limits on ancillary fees. Confirm which services
@@ -243,7 +243,7 @@ ClearLine does not encode any of these rules. Each needs a decision, per facilit
 - **Unused balance**: refund on request, on account closure, or on the resident's release/transfer; state
   unclaimed-property rules; how long balances may sit.
 - **Money transmission / stored value**: a prepaid balance usable across facilities may raise money-transmitter or
-  prepaid-access questions; confirm the structure (e.g. ClearLine as merchant of record for a service credit).
+  prepaid-access questions; confirm the structure (e.g. SecureVisit as merchant of record for a service credit).
 - **Consumer disclosures**: prices shown before purchase, receipts, refund policy, terms of service.
 - **Taxes** on communication services, if any, in each jurisdiction.
 
@@ -263,6 +263,6 @@ ClearLine does not encode any of these rules. Each needs a decision, per facilit
 ## Remaining engineering work
 
 - Staff reporting UI for fees/refunds per facility (data is already readable by staff via RLS).
-- Balance refunds to card initiated from ClearLine (today: Stripe Dashboard).
+- Balance refunds to card initiated from SecureVisit (today: Stripe Dashboard).
 - Per-contact fee exemptions (legal correspondence).
 - iOS storefront check and any Apple entitlement once the policy decision is made.

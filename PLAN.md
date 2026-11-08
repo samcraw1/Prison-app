@@ -1,4 +1,4 @@
-# ClearLine MVP — Plan (awaiting approval)
+# SecureVisit MVP — Plan (awaiting approval)
 
 Name lives in one config value: `NEXT_PUBLIC_APP_NAME`.
 

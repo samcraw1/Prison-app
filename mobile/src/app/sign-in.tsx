@@ -30,7 +30,7 @@ export default function SignIn() {
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: space(5), gap: space(6) }} keyboardShouldPersistTaps="handled">
           <View style={{ alignItems: "center", gap: space(2) }}>
             <Image source={require("../../assets/icon.png")} style={{ width: 72, height: 72, borderRadius: 16 }} accessibilityIgnoresInvertColors />
-            <Text style={{ fontSize: 28, fontWeight: "700", color: colors.primaryDark }} accessibilityRole="header">ClearLine</Text>
+            <Text style={{ fontSize: 28, fontWeight: "700", color: colors.primaryDark }} accessibilityRole="header">SecureVisit</Text>
             <Muted style={{ textAlign: "center" }}>Stay connected with the people you love.</Muted>
           </View>
           <Card style={{ gap: space(4) }}>
