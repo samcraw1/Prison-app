@@ -21,7 +21,7 @@ The product name is a placeholder; rename it with one value: `NEXT_PUBLIC_APP_NA
 | Video visits | Staff publish slots; families request; staff approve; weekly-limit and capacity enforcement; browser video via Daily; staff can watch silently and end any live visit; metadata only |
 | Staff console | Dashboard, residents (intake, PIN reset, block contact, suspend), settings, keywords, staff accounts (admin), filterable/exportable audit log |
 
-Out of scope (not built): phone calls, payments, commissary, media store, native apps, real ID verification,
+Out of scope (not built): phone calls, payments, commissary, media store, real ID verification,
 multi-facility billing, jail-management-system integration.
 
 ## Architecture
@@ -61,6 +61,21 @@ Security model, in short:
 - Role and facility live in `app_metadata`, which clients cannot edit; public Auth sign-up is disabled and accounts are
   created by server routes only.
 - No secrets in client code; the service-role key is only imported by server-only modules.
+
+## Mobile apps (iOS and Android)
+
+`mobile/` is an Expo app for **family and friends**. It runs on the same backend as the website: one Supabase
+project, the same accounts, RLS policies and database functions, and the same Next.js API routes (it sends a
+`Bearer` access token instead of a cookie). Messages, visits and connection requests sync in both directions. The
+staff console and resident kiosk stay web-only.
+
+- Realtime: the website (family and staff pages) and the app subscribe to Supabase Realtime, and polling remains
+  as a fallback.
+- Push notifications: database triggers write to `push_outbox` with fixed, content-free text. The `push-dispatch`
+  edge function delivers them through Expo Push.
+- Setup, environments and store release: [docs/mobile/RELEASE.md](docs/mobile/RELEASE.md). Proof-of-concept status:
+  [docs/mobile/POC-RESULTS.md](docs/mobile/POC-RESULTS.md). Payments policy notes:
+  [docs/mobile/PAYMENTS-POLICY.md](docs/mobile/PAYMENTS-POLICY.md).
 
 ## Local setup
 
@@ -135,6 +150,10 @@ src/app/{family,resident,staff}/   role-specific UIs
 src/app/api/           resident login, family sign-up, visit join/end, audit export
 src/lib/               supabase clients, auth guard, video provider seam, pricing hook, audit helpers
 scripts/seed.ts        demo data (fictional)
+mobile/                Expo family app (iOS + Android), separate package
+shared/                framework-free TS shared by web and mobile (status labels, limits)
+supabase/functions/    push-dispatch edge function (Deno)
+docs/mobile/           mobile release, PoC results, payments policy
 tests/integration/     vitest + fake Daily server
 ```
 

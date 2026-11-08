@@ -15,6 +15,12 @@ insert into public.residents (id, facility_id, user_id, booking_number, full_nam
   ('c1000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000005', 'T-0001', 'Res One'),
   ('c1000000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000006', 'T-0002', 'Res Two');
 
+-- request_connection requires the ID photo to have been uploaded
+insert into storage.objects (bucket_id, name) values
+  ('id-photos', '11111111-0000-0000-0000-000000000001/a1000000-0000-0000-0000-000000000003/id.jpg'),
+  ('id-photos', '11111111-0000-0000-0000-000000000001/a1000000-0000-0000-0000-000000000003/id2.jpg'),
+  ('id-photos', '11111111-0000-0000-0000-000000000001/a1000000-0000-0000-0000-000000000004/id.jpg');
+
 -- family A requests a connection
 select tests.as_user('a1000000-0000-0000-0000-000000000003');
 select lives_ok($$select public.request_connection('res one', 'T-0001', 'Mother', '11111111-0000-0000-0000-000000000001/a1000000-0000-0000-0000-000000000003/id.jpg')$$, 'family can request a connection (name match is case-insensitive)');
@@ -43,7 +49,7 @@ reset role;
 -- staff decides
 select tests.as_user('a1000000-0000-0000-0000-000000000002');
 select is((select count(*)::int from public.connection_requests where status = 'pending'), 2, 'staff sees pending queue');
-select throws_ok($$select public.decide_connection((select id from public.connection_requests where resident_id is null), true)$$, 'P0001', 'no matching resident; deny instead', 'cannot approve an unmatched request');
+select throws_ok($$select public.decide_connection((select id from public.connection_requests where resident_id is null), true)$$, 'P0001', 'no matching resident; link a resident or deny', 'cannot approve an unmatched request');
 select lives_ok($$select public.decide_connection((select id from public.connection_requests where resident_id is not null), true)$$, 'staff approves matched request');
 select throws_ok($$select public.decide_connection((select id from public.connection_requests where resident_id is not null), false, 'x')$$, 'P0001', 'request already decided', 'cannot decide twice');
 select lives_ok($$select public.decide_connection((select id from public.connection_requests where resident_id is null), false, 'No such resident')$$, 'staff denies unmatched request');

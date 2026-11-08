@@ -5,15 +5,16 @@ import { LocalTime } from "@/components/LocalTime";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { RequestVisit } from "./RequestVisit";
 import { CancelVisit } from "./CancelVisit";
+import { VISIT_LABEL, VISIT_TONE, type VisitStatus } from "@shared/status";
 
 export const metadata = { title: "Video visits" };
 
-const TONE = { requested: "amber", approved: "green", live: "green", denied: "red", ended: "slate", cancelled: "slate" } as const;
-const LABEL = { requested: "Waiting for staff", approved: "Approved", live: "In progress", denied: "Not approved", ended: "Finished", cancelled: "Cancelled" } as const;
+const TONE = VISIT_TONE;
+const LABEL = VISIT_LABEL;
 
 type VisitRow = {
   id: string;
-  status: keyof typeof TONE;
+  status: VisitStatus;
   contact_id: string;
   deny_reason: string | null;
   visit_slots: { starts_at: string; ends_at: string };
@@ -35,7 +36,7 @@ export default async function FamilyVisits() {
 
   return (
     <div className="space-y-6">
-      <AutoRefresh seconds={30} />
+      <AutoRefresh seconds={30} live={["visits"]} />
       <Link href="/family" className="text-sm text-blue-800 underline">← Back</Link>
       <Card>
         <h1 className="mb-3 text-xl font-semibold">Request a video visit</h1>

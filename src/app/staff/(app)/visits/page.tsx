@@ -46,7 +46,7 @@ export default async function StaffVisits({ searchParams }: { searchParams: Prom
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-      <AutoRefresh seconds={15} />
+      <AutoRefresh seconds={15} live={["visits"]} />
       <div className="space-y-6">
         <h1 className="text-xl font-semibold">Video visits</h1>
         <ErrorText>{error}</ErrorText>

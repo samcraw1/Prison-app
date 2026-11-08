@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getRequestAuth } from "@/lib/supabase/request";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getVideoProvider } from "@/lib/video/daily";
 
 const EARLY_JOIN_MS = 5 * 60_000;
 
-export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const id = z.string().uuid().safeParse((await params).id);
   if (!id.success) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "Please sign in" }, { status: 401 });
-  const { data: me } = await supabase.from("users").select("id, role, full_name, facility_id").eq("id", auth.user.id).single();
+  const { supabase, user } = await getRequestAuth(req);
+  if (!user) return NextResponse.json({ error: "Please sign in" }, { status: 401 });
+  const { data: me } = await supabase.from("users").select("id, role, full_name, facility_id").eq("id", user.id).single();
   if (!me) return NextResponse.json({ error: "Please sign in" }, { status: 401 });
 
   await supabase.rpc("expire_visits");

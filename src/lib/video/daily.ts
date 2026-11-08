@@ -52,6 +52,8 @@ export function createDailyProvider(apiKey: string, baseUrl = "https://api.daily
             user_name: userName,
             user_id: userId,
             exp: unix(expiresAt),
+            // Hard stop at the end of the slot: the participant is removed when the token expires.
+            eject_at_token_exp: true,
             is_owner: false,
             enable_screenshare: false,
             // Staff watching a visit are hidden, receive-only observers.

@@ -29,3 +29,20 @@ export async function decideRequest(formData: FormData) {
   revalidatePath("/staff", "layout");
   redirect("/staff/requests");
 }
+
+const linkSchema = z.object({ requestId: z.string().uuid(), residentId: z.string().uuid() });
+
+// Staff-assisted verification for requests that didn't match the roster. Approval is still a separate step.
+export async function linkResident(formData: FormData) {
+  const parsed = linkSchema.safeParse({ requestId: formData.get("requestId"), residentId: formData.get("residentId") });
+  if (!parsed.success) redirect("/staff/requests?error=Choose+a+resident");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("link_request_resident", {
+    p_request: parsed.data.requestId,
+    p_resident: parsed.data.residentId,
+  });
+  if (error) redirect(`/staff/requests?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/staff/requests");
+  redirect("/staff/requests");
+}

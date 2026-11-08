@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth";
 import { Badge, Button, Card, ErrorText } from "@/components/ui";
-import { decideRequest } from "./actions";
+import { decideRequest, linkResident } from "./actions";
 
 export const metadata = { title: "Connection requests" };
 
@@ -12,6 +12,11 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
     .select("id, typed_resident_name, typed_booking_number, relationship, id_photo_path, resident_id, created_at, users!connection_requests_family_user_id_fkey(full_name, email, phone), residents(full_name, booking_number)")
     .eq("status", "pending")
     .order("created_at");
+
+  const needsLink = (requests ?? []).some((r) => !r.resident_id);
+  const { data: roster } = needsLink
+    ? await supabase.from("residents").select("id, full_name, booking_number").eq("custody_status", "active").order("full_name")
+    : { data: [] as { id: string; full_name: string; booking_number: string }[] };
 
   const withPhotos = await Promise.all(
     (requests ?? []).map(async (r) => {
@@ -44,7 +49,22 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                   {resident ? (
                     <Badge tone="green">Matches {resident.full_name} ({resident.booking_number})</Badge>
                   ) : (
-                    <Badge tone="red">No matching resident</Badge>
+                    <div className="space-y-2">
+                      <Badge tone="red">No matching resident</Badge>
+                      <form action={linkResident} className="flex flex-wrap items-end gap-2">
+                        <input type="hidden" name="requestId" value={r.id} />
+                        <label className="text-sm">
+                          <span className="block text-slate-600">After checking the details, link to:</span>
+                          <select name="residentId" required defaultValue="" className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            <option value="" disabled>Choose a resident</option>
+                            {(roster ?? []).map((res) => (
+                              <option key={res.id} value={res.id}>{res.full_name} · {res.booking_number}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <Button variant="secondary">Link resident</Button>
+                      </form>
+                    </div>
                   )}
                 </div>
                 <form action={decideRequest} className="flex flex-wrap items-end gap-3 pt-2">
