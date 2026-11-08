@@ -38,7 +38,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-8">
-      <AutoRefresh seconds={15} />
+      <AutoRefresh seconds={15} live={["messages"]} />
       <section className="space-y-4">
         <h1 className="text-xl font-semibold">Messages waiting for review</h1>
         <ErrorText>{error}</ErrorText>

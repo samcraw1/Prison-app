@@ -15,7 +15,7 @@ export default async function FamilyThread({ params }: { params: Promise<{ conta
 
   return (
     <div className="space-y-4">
-      <AutoRefresh />
+      <AutoRefresh live={["messages"]} />
       <Link href="/family" className="text-sm text-blue-800 underline">← Back</Link>
       <h1 className="text-xl font-semibold">Messages with {contact.name}</h1>
       <MessageThread supabase={supabase} contactId={contactId} viewer="family" />

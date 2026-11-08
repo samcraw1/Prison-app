@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getRequestAuth } from "@/lib/supabase/request";
 import { getVideoProvider } from "@/lib/video/daily";
 
 // Staff-only: kick everyone out of the room, then record who ended it.
-export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const id = z.string().uuid().safeParse((await params).id);
   if (!id.success) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return NextResponse.json({ error: "Please sign in" }, { status: 401 });
-  const { data: me } = await supabase.from("users").select("role").eq("id", auth.user.id).single();
+  const { supabase, user } = await getRequestAuth(req);
+  if (!user) return NextResponse.json({ error: "Please sign in" }, { status: 401 });
+  const { data: me } = await supabase.from("users").select("role").eq("id", user.id).single();
   if (!me || !["staff", "admin"].includes(me.role)) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
 
   const { data: visit } = await supabase.from("visits").select("id, status, daily_room").eq("id", id.data).maybeSingle();

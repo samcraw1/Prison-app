@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Separate projects with their own tooling: Expo app (npx expo lint) and Deno edge functions.
+    "mobile/**",
+    "supabase/functions/**",
   ]),
 ]);
 
