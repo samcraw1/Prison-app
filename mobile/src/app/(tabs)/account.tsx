@@ -9,6 +9,7 @@ import { enablePush, notificationStatus, unregisterPush } from "@/lib/push";
 import { supabase } from "@/lib/supabase";
 import { keys, useBalance, useDeletion } from "@/lib/queries";
 import { formatCents } from "@shared/payments";
+import { PAYMENTS_ENABLED } from "@/lib/payments";
 import { Avatar, Badge, Button, Row, Section } from "@/components/ui";
 import { colors, space, type } from "@/components/theme";
 
@@ -130,6 +131,7 @@ export default function Account() {
         <Row divider title="Website access" subtitle="Use the same email and password on the SecureVisit website." left={<Icon name="globe-outline" />} />
       </Section>
 
+      {PAYMENTS_ENABLED && (
       <Section title="Balance">
         <Row
           title="Balance and history"
@@ -139,6 +141,7 @@ export default function Account() {
           onPress={() => router.push("/wallet")}
         />
       </Section>
+      )}
 
       <Section
         title="Preferences"

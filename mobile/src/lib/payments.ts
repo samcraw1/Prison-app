@@ -2,6 +2,11 @@ import { Linking, Platform } from "react-native";
 import * as Crypto from "expo-crypto";
 import { apiPost } from "./api";
 
+// Master switch for every payment-related screen and message in the app (balance, add funds, fee notices).
+// Off by default: version 1.0 ships without payments. Turn on with EXPO_PUBLIC_PAYMENTS_ENABLED=true in a build
+// that App Review has been told about (see docs/PAYMENTS.md). The database enforces fees independently.
+export const PAYMENTS_ENABLED = process.env.EXPO_PUBLIC_PAYMENTS_ENABLED === "true";
+
 // How this build lets people add funds. Store rules differ by platform and storefront, so this is a build-time
 // flag, off by default, and the decision is documented in docs/PAYMENTS.md. Nothing here touches card data:
 // the app asks our API for a Stripe Checkout URL and opens it in the system browser.

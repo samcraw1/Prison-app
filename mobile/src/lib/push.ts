@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { supabase } from "./supabase";
+import { PAYMENTS_ENABLED } from "./payments";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldPlaySound: true, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true }),
@@ -51,7 +52,7 @@ export function routeForNotification(data: Record<string, unknown> | undefined):
   if (data.type === "message" && typeof data.contactId === "string") return `/thread/${data.contactId}`;
   if (data.type === "visit") return "/visits";
   if (data.type === "connection") return "/";
-  if (data.type === "wallet") return "/wallet";
+  if (data.type === "wallet") return PAYMENTS_ENABLED ? "/wallet" : null;
   return null;
 }
 
