@@ -14,6 +14,7 @@ import { useLiveQuery } from "@/lib/realtime";
 import { useAuth } from "@/lib/auth";
 import { markThreadSeen } from "@/lib/unread";
 import { supabase } from "@/lib/supabase";
+import { messageMenu, threadMenu } from "@/lib/safety";
 import { pickPhoto, uploadPhoto, type PickedPhoto } from "@/lib/upload";
 import { Empty, ErrorText, LoadError, Loading } from "@/components/ui";
 import { colors, radius, space } from "@/components/theme";
@@ -45,6 +46,14 @@ export default function Thread() {
 
   const contactName = name ?? contacts.data?.find((c) => c.contact_id === contactId)?.name ?? "Messages";
   const notFound = contacts.isSuccess && !contacts.data.some((c) => c.contact_id === contactId);
+
+  // Blocking hides the conversation: refresh the lists and leave the thread.
+  function afterBlock() {
+    qc.invalidateQueries({ queryKey: keys.contacts });
+    qc.invalidateQueries({ queryKey: keys.blocked });
+    qc.invalidateQueries({ queryKey: keys.latestIncoming });
+    router.back();
+  }
 
   async function choosePhoto() {
     const go = async (src: "library" | "camera") => {
@@ -99,7 +108,14 @@ export default function Thread() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={headerHeight}>
-      <Stack.Screen options={{ title: contactName }} />
+      <Stack.Screen options={{
+        title: contactName,
+        headerRight: () => (
+          <Pressable accessibilityRole="button" accessibilityLabel="Report or block" hitSlop={12} onPress={() => threadMenu(contactId, contactName, afterBlock)}>
+            <Ionicons name="ellipsis-horizontal-circle-outline" size={26} color={colors.primary} />
+          </Pressable>
+        ),
+      }} />
       {thread.isPending ? <Loading /> : thread.isError ? <LoadError onRetry={() => thread.refetch()} /> : (
         <FlatList
           inverted
@@ -115,7 +131,12 @@ export default function Thread() {
             const photoUri = isPending ? item.photoUri : item.photo;
             return (
               <View style={{ alignItems: mine ? "flex-end" : "flex-start" }}>
-                <View
+                <Pressable
+                  disabled={mine}
+                  onLongPress={() => messageMenu(contactId, item.id, contactName, afterBlock)}
+                  accessibilityHint={mine ? undefined : "Double tap and hold to report this message or block the sender"}
+                  accessibilityActions={mine ? undefined : [{ name: "report", label: "Report or block" }]}
+                  onAccessibilityAction={() => messageMenu(contactId, item.id, contactName, afterBlock)}
                   accessible
                   accessibilityLabel={`${mine ? "You" : contactName}: ${item.body}${note ? `. ${note}` : ""}`}
                   style={{
@@ -129,7 +150,7 @@ export default function Thread() {
                   <Text style={{ fontSize: 12, marginTop: 4, color: mine ? "#bfdbfe" : colors.faint }}>
                     {isPending ? "" : time(item.created_at)}{note ? `${isPending ? "" : " · "}${note}` : ""}
                   </Text>
-                </View>
+                </Pressable>
               </View>
             );
           }}

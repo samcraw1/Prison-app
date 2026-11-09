@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { enablePush, notificationStatus, unregisterPush } from "@/lib/push";
 import { supabase } from "@/lib/supabase";
-import { keys, useBalance, useDeletion } from "@/lib/queries";
+import { keys, useBalance, useBlocked, useDeletion } from "@/lib/queries";
 import { formatCents } from "@shared/payments";
 import { PAYMENTS_ENABLED } from "@/lib/payments";
 import { Avatar, Badge, Button, Row, Section } from "@/components/ui";
@@ -85,6 +85,26 @@ function DeleteAccount({ email, balance }: { email?: string; balance?: number })
           <Button title="Delete my account" variant="danger" busy={busy} busyTitle="Working…" disabled={!password} onPress={request} />
         </View>
       )}
+    </Section>
+  );
+}
+
+function BlockedContacts() {
+  const qc = useQueryClient();
+  const blocked = useBlocked();
+  if (!blocked.data?.length) return null;
+  async function unblock(id: string) {
+    const { error } = await supabase.rpc("unblock_contact", { p_contact: id });
+    if (error) { Alert.alert("Couldn't unblock", "Please try again."); return; }
+    qc.invalidateQueries({ queryKey: keys.blocked });
+    qc.invalidateQueries({ queryKey: keys.contacts });
+  }
+  return (
+    <Section title="Blocked contacts" footer="You won't see messages from blocked contacts, and they can't message you or be booked for visits.">
+      {blocked.data.map((b, i) => (
+        <Row key={b.contact_id} divider={i > 0} title={b.name} left={<Icon name="ban-outline" />}
+          right={<Button title="Unblock" variant="secondary" onPress={() => unblock(b.contact_id)} />} />
+      ))}
     </Section>
   );
 }
@@ -170,6 +190,8 @@ export default function Account() {
         <Row divider title="Version" left={<Icon name="information-circle-outline" />}
           right={<Text style={[type.subhead, { color: colors.faint }]}>{Constants.expoConfig?.version}{APP_ENV && APP_ENV !== "production" ? ` (${APP_ENV})` : ""}</Text>} />
       </Section>
+
+      <BlockedContacts />
 
       <DeleteAccount email={profile?.email} balance={balance.data} />
 
