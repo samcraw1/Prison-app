@@ -31,6 +31,7 @@ export default function RequestVisit() {
   const [slotId, setSlotId] = useState<string>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [callBusy, setCallBusy] = useState(false);
 
   if (contacts.isPending || (who && slots.isPending)) return <Loading />;
   if (contacts.isError || slots.isError) return <LoadError onRetry={() => { contacts.refetch(); slots.refetch(); }} />;
@@ -52,8 +53,30 @@ export default function RequestVisit() {
     router.back();
   }
 
+  // "Call now": an on-demand visit that starts in about ten minutes. Staff still approve it.
+  async function callNow() {
+    if (!who) return;
+    setCallBusy(true);
+    setError(undefined);
+    const { error: rpcError } = await supabase.rpc("request_instant_visit", { p_contact: who });
+    setCallBusy(false);
+    setNeedsFunds(isInsufficientBalance(rpcError));
+    if (rpcError) return setError(isInsufficientBalance(rpcError) ? "Your balance is too low to request this visit." : rpcError.code === "P0001" ? rpcError.message : "Could not start a call right now.");
+    qc.invalidateQueries({ queryKey: ["wallet"] });
+    await qc.invalidateQueries({ queryKey: keys.visits });
+    await qc.invalidateQueries({ queryKey: keys.slots });
+    router.back();
+  }
+
   return (
     <ScrollView contentContainerStyle={{ padding: space(4), gap: space(4) }}>
+      <Card>
+        <Text style={{ fontSize: 17, fontWeight: "600", color: colors.text }}>Call right now</Text>
+        <Muted style={{ marginVertical: space(2) }}>
+          Asks facility staff for a 20-minute video visit starting in about 10 minutes. You can join as soon as staff approve it. Staff may be busy, so scheduling a time below is more reliable.
+        </Muted>
+        <Button title="Call now" busy={callBusy} busyTitle="Asking staff…" onPress={callNow} disabled={!who || busy} />
+      </Card>
       {contacts.data.length > 1 && (
         <Card>
           <Text style={{ fontSize: 17, fontWeight: "600", color: colors.text }}>Who are you visiting?</Text>
