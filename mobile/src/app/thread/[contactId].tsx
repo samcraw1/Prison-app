@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MAX_MESSAGE_CHARS, messageStatusNote } from "@shared/status";
 import { friendlyError, keys, useContactPrices, useContacts, useThread, type Message } from "@/lib/queries";
 import { formatCents, isInsufficientBalance } from "@shared/payments";
+import { PAYMENTS_ENABLED } from "@/lib/payments";
 import { useLiveQuery } from "@/lib/realtime";
 import { useAuth } from "@/lib/auth";
 import { markThreadSeen } from "@/lib/unread";
@@ -136,7 +137,7 @@ export default function Thread() {
       )}
       <View style={{ borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.card, padding: space(3), paddingBottom: Math.max(insets.bottom, space(3)), gap: space(2) }}>
         <ErrorText>{error}</ErrorText>
-        {needsFunds && (
+        {PAYMENTS_ENABLED && needsFunds && (
           <Pressable accessibilityRole="button" onPress={() => router.push("/wallet")} hitSlop={8}>
             <Text style={{ color: colors.primary, fontWeight: "600" }}>View balance</Text>
           </Pressable>
@@ -172,7 +173,7 @@ export default function Thread() {
         </View>
         <Text style={{ fontSize: 12, color: colors.faint, textAlign: "center" }}>
           All messages are reviewed by facility staff.
-          {prices.data?.message_fee_cents ? ` Each message costs ${formatCents(prices.data.message_fee_cents)}${prices.data.free_messages_left > 0 ? ` (${prices.data.free_messages_left} free left this week)` : ""}.` : ""}
+          {PAYMENTS_ENABLED && prices.data?.message_fee_cents ? ` Each message costs ${formatCents(prices.data.message_fee_cents)}${prices.data.free_messages_left > 0 ? ` (${prices.data.free_messages_left} free left this week)` : ""}.` : ""}
         </Text>
       </View>
     </KeyboardAvoidingView>

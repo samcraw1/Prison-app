@@ -5,6 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQueryClient } from "@tanstack/react-query";
 import { keys, useContactPrices, useContacts, useSlots } from "@/lib/queries";
 import { formatCents, isInsufficientBalance } from "@shared/payments";
+import { PAYMENTS_ENABLED } from "@/lib/payments";
 import { supabase } from "@/lib/supabase";
 import { Button, Card, Empty, ErrorText, LoadError, Loading, Muted } from "@/components/ui";
 import { colors, space } from "@/components/theme";
@@ -70,8 +71,8 @@ export default function RequestVisit() {
       </Card>
       <View style={{ gap: space(2) }}>
         <ErrorText>{error}</ErrorText>
-        {needsFunds && <Button title="View balance" variant="secondary" onPress={() => router.push("/wallet")} />}
-        {prices.data?.visit_fee_cents ? (
+        {PAYMENTS_ENABLED && needsFunds && <Button title="View balance" variant="secondary" onPress={() => router.push("/wallet")} />}
+        {PAYMENTS_ENABLED && prices.data?.visit_fee_cents ? (
           <Muted style={{ textAlign: "center" }}>
             This visit costs {formatCents(prices.data.visit_fee_cents)}, refunded if it isn&apos;t approved or doesn&apos;t take place.
           </Muted>

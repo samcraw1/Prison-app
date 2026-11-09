@@ -1,18 +1,18 @@
 import { useCallback, useState } from "react";
 import { AppState, RefreshControl, ScrollView, Text, View } from "react-native";
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { DEPOSIT_AMOUNTS_CENTS, formatCents, ledgerDescription } from "@shared/payments";
 import { keys, useBalance, useLedger } from "@/lib/queries";
 import { useLiveQuery } from "@/lib/realtime";
-import { openCheckout, purchaseMode } from "@/lib/payments";
+import { openCheckout, PAYMENTS_ENABLED, purchaseMode } from "@/lib/payments";
 import { ApiError } from "@/lib/api";
 import { Button, EmptyRow, ErrorText, LoadError, Loading, Notice, Row, Section } from "@/components/ui";
 import { colors, space, type } from "@/components/theme";
 
 const when = (iso: string) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
-export default function Wallet() {
+function Wallet() {
   // securevisit://wallet?status=success|cancelled when returning from Stripe Checkout.
   const { status } = useLocalSearchParams<{ status?: string }>();
   const qc = useQueryClient();
@@ -103,4 +103,9 @@ export default function Wallet() {
       </Section>
     </ScrollView>
   );
+}
+
+// With payments off the screen does not exist for users, including via the securevisit://wallet deep link.
+export default function WalletScreen() {
+  return PAYMENTS_ENABLED ? <Wallet /> : <Redirect href="/" />;
 }
