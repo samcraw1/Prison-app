@@ -28,6 +28,7 @@ export const keys = {
   facilities: ["connect-facilities"] as const,
   balance: ["wallet", "balance"] as const,
   deletion: ["account", "deletion"] as const,
+  blocked: ["blocked-contacts"] as const,
   ledger: ["wallet", "ledger"] as const,
   prices: (contactId: string) => ["wallet", "prices", contactId] as const,
 };
@@ -118,6 +119,10 @@ export const useLatestIncoming = () =>
 // The balance is computed in the database from the append-only ledger; the app never adds anything up itself.
 export const useBalance = () =>
   useQuery({ queryKey: keys.balance, queryFn: async () => Number(await unwrap<number>(supabase.rpc("my_balance"))) });
+
+export type BlockedContact = { contact_id: string; name: string };
+export const useBlocked = () =>
+  useQuery({ queryKey: keys.blocked, queryFn: () => unwrap<BlockedContact[]>(supabase.rpc("list_blocked_contacts")) });
 
 // When this account will be deleted (30-day grace period), or null.
 export const useDeletion = () =>
