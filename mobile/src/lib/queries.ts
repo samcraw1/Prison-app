@@ -31,6 +31,7 @@ export const keys = {
   blocked: ["blocked-contacts"] as const,
   ledger: ["wallet", "ledger"] as const,
   prices: (contactId: string) => ["wallet", "prices", contactId] as const,
+  helpAvailable: ["help", "available"] as const,
 };
 
 export const useContacts = () =>
@@ -144,3 +145,7 @@ export const useContactPrices = (contactId: string | undefined) =>
     enabled: !!contactId,
     queryFn: async () => (await unwrap<Prices[]>(supabase.rpc("contact_prices", { p_contact: contactId })))[0] ?? null,
   });
+
+// Whether the AI help assistant is turned on for any of this family member's facilities.
+export const useHelpAvailable = () =>
+  useQuery({ queryKey: keys.helpAvailable, staleTime: 10 * 60_000, queryFn: async () => Boolean(await unwrap<boolean>(supabase.rpc("help_available"))) });
