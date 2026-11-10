@@ -1,3 +1,6 @@
 {
-  "crons": [{ "path": "/api/cron/erase-accounts", "schedule": "17 4 * * *" }]
+  "crons": [
+    { "path": "/api/cron/erase-accounts", "schedule": "17 4 * * *" },
+    { "path": "/api/cron/ai-retention", "schedule": "37 4 * * *" }
+  ]
 }

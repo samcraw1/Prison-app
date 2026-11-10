@@ -1,3 +1,4 @@
+import "@/lib/polyfills";
 import { useEffect } from "react";
 import { AppState, Platform } from "react-native";
 import { Stack, router } from "expo-router";
@@ -46,6 +47,7 @@ function RootStack() {
         <Stack.Screen name="connect" options={{ title: "Connect with someone", presentation: "modal" }} />
         <Stack.Screen name="request-visit" options={{ title: "Request a visit", presentation: "modal" }} />
         <Stack.Screen name="wallet" options={{ title: "Balance" }} />
+        <Stack.Screen name="help" options={{ title: "Help" }} />
         <Stack.Screen name="visit/[id]" options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }} />
       </Stack.Protected>
     </Stack>

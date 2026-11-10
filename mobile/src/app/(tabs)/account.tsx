@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { enablePush, notificationStatus, unregisterPush } from "@/lib/push";
 import { supabase } from "@/lib/supabase";
-import { keys, useBalance, useBlocked, useDeletion } from "@/lib/queries";
+import { keys, useBalance, useBlocked, useDeletion, useHelpAvailable } from "@/lib/queries";
 import { formatCents } from "@shared/payments";
 import { PAYMENTS_ENABLED } from "@/lib/payments";
 import { Avatar, Badge, Button, Row, Section } from "@/components/ui";
@@ -115,6 +115,7 @@ export default function Account() {
   const [push, setPush] = useState<string>();
   const [busy, setBusy] = useState(false);
   const balance = useBalance();
+  const helpAvailable = useHelpAvailable();
 
   // Re-read permission when the tab gains focus or the app returns from Settings.
   useFocusEffect(useCallback(() => {
@@ -183,6 +184,18 @@ export default function Account() {
           </View>
         )}
       </Section>
+
+      {helpAvailable.data && (
+      <Section title="Help">
+        <Row
+          title="Ask a question"
+          subtitle="AI answers from your facility's rules and FAQs"
+          left={<Icon name="help-circle-outline" />}
+          chevron
+          onPress={() => router.push("/help")}
+        />
+      </Section>
+      )}
 
       <Section title="About">
         <Row title="Monitoring" subtitle="Messages are reviewed by facility staff before delivery. Video visits may be watched by staff and can be ended by them." left={<Icon name="shield-checkmark-outline" />} />

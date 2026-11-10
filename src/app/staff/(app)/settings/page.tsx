@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { Button, Card, Field } from "@/components/ui";
 import { ActionForm } from "@/components/ActionForm";
@@ -14,6 +15,7 @@ export default async function SettingsPage() {
   const s = (facility?.settings ?? {}) as {
     hold_all_messages: boolean; max_visit_minutes: number; max_visits_per_week: number;
     message_fee_cents?: number; visit_fee_cents?: number; free_messages_per_week?: number;
+    help_bot_enabled?: boolean;
   };
   const dollars = (c?: number) => ((c ?? 0) / 100).toFixed(2);
   const isAdmin = profile.role === "admin";
@@ -42,6 +44,23 @@ export default async function SettingsPage() {
             <Field label="Price per family message ($)" name="message_fee" type="number" min={0} max={5} step="0.01" defaultValue={dollars(s.message_fee_cents)} disabled={!isAdmin} required />
             <Field label="Free family messages per week" name="free_messages_per_week" type="number" min={0} max={500} defaultValue={s.free_messages_per_week ?? 0} disabled={!isAdmin} required />
             <Field label="Price per video visit ($)" name="visit_fee" type="number" min={0} max={50} step="0.01" defaultValue={dollars(s.visit_fee_cents)} disabled={!isAdmin} required />
+          </fieldset>
+          <fieldset className="space-y-3 border-t border-slate-200 pt-4">
+            <legend className="pt-4 font-medium">AI features</legend>
+            <p className="text-sm text-slate-600">
+              Off unless you turn them on. Check your contract and policies before enabling. See docs/AI.md.
+            </p>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" name="help_bot_enabled" defaultChecked={s.help_bot_enabled ?? false} disabled={!isAdmin} className="mt-1 h-4 w-4" />
+              <span>
+                <span className="font-medium">Family help assistant</span>
+                <span className="block text-sm text-slate-600">
+                  Answers family questions using only the platform FAQ, these policies and your{" "}
+                  <Link href="/staff/settings/help" className="text-blue-800 underline">facility FAQ</Link>. It never sees
+                  messages, visits or resident details. Nothing families type is stored.
+                </span>
+              </span>
+            </label>
           </fieldset>
           {isAdmin && <Button type="submit">Save policies</Button>}
         </ActionForm>
