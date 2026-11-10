@@ -73,7 +73,7 @@ describe("help bot access", () => {
 });
 
 describe("help bot answers", () => {
-  it("streams an answer built only from FAQs and policies, with zero data retention", async () => {
+  it("streams an answer built only from FAQs and policies, routed to no-training providers", async () => {
     const fid = await facilityId();
     const rid = await riversideId();
     await setHelp(fid, true);
@@ -99,7 +99,7 @@ describe("help bot answers", () => {
     expect(call.raw).toContain("What ID do visitors need?"); // own facility FAQ
     expect(call.raw).toContain("Why is my message held or pending?"); // platform FAQ
     expect(call.raw).not.toContain("Riverside parking"); // a facility this family has no connection with
-    expect(JSON.stringify(call.body)).toMatch(/"zeroDataRetention":true/);
+    expect(JSON.stringify(call.body)).not.toMatch(/"zeroDataRetention"/); // owner decision: not required for the help bot (Hobby plan)
     expect(JSON.stringify(call.body)).toMatch(/"disallowPromptTraining":true/);
 
     // Nothing about people: no message bodies, resident names, booking numbers or the family's own details.

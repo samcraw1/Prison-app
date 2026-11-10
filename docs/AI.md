@@ -8,14 +8,19 @@ Status: **help bot built and tested** (branch `v1.1-ai`, PR 1 of 3). Translation
 - **Opt-in per facility.** Facility contracts may forbid sending content to a third party. Check before enabling.
 - **AI never decides.** It never approves, rejects, delivers or hides a message.
 - **No AI for residents.** No legal advice.
-- **Server-side only.** No model keys in the apps or the browser. Every call goes through Vercel AI Gateway with
-  `zeroDataRetention: true` and `disallowPromptTraining: true` (`src/lib/ai/client.ts`). If no provider meets
-  both, the request **fails** rather than routing elsewhere.
+- **Server-side only.** No model keys in the apps or the browser. Every call goes through Vercel AI Gateway
+  (`src/lib/ai/client.ts`), always with `disallowPromptTraining: true`. Anything that sends **message content**
+  (translation, review assist) also requires `zeroDataRetention: true`; if no provider meets both, the request
+  **fails** rather than routing elsewhere.
+- **Help bot exception (owner decision, 2026-11-10):** the help bot does *not* require zero data retention, because
+  request-level ZDR needs a Vercel Pro plan and the team is on Hobby. It never sends message content, but what a
+  family types goes to the provider under its standard retention. Revisit when moving to Pro.
 - **Store only what's needed**, with the retention below. Audit with ids only.
 
 ## Owner setup (before turning anything on)
 
-1. Create an AI Gateway key and set `AI_GATEWAY_API_KEY` (server-only) in Vercel.
+1. On Vercel, AI Gateway authenticates with the project's OIDC token, so no key is needed. Elsewhere, set
+   `AI_GATEWAY_API_KEY` (server-only).
 2. Confirm the model id from the gateway list (`curl -s https://ai-gateway.vercel.sh/v1/models`) and set
    `AI_MODEL` (planned: `anthropic/claude-haiku-5.5`). It has no default.
 3. Confirm **zero data retention at both layers**: the gateway (request-level ZDR needs a Vercel Pro or Enterprise
@@ -48,6 +53,8 @@ facility, active contacts, pending requests) **and** that has the bot on: the fa
 
 **What it can't do:** it has no tools. It can't see messages, visits, requests, balance or account, and can't act.
 
+**Routing:** no-training providers only; zero data retention not required (see Principles).
+
 **Limits and logging:** 30 questions per family member per day (`take_help_question()`, `help_usage` holds only
 `user_id, day, count`). Chat text is never stored. "Report answer" writes `help.report` to the audit log with no
 text. Gateway errors are replaced with a generic message.
@@ -72,7 +79,7 @@ directly; staff read only their facility's FAQ. All writes go through security-d
   resident data), daily limit, report text-free, staff/resident refused, off switch, retention and erasure.
 - `tests/integration/help.test.ts` with `tests/integration/fake-llm.ts` (a fake AI Gateway on port 4997, set via
   `AI_API_BASE` in `scripts/test-integration.sh`): auth (none, bad token, staff, resident), off by default,
-  malformed bodies, FAQ-only prompt with ZDR flags and no person data, cookie auth, hidden gateway errors, rate
+  malformed bodies, FAQ-only prompt with the no-training flag and no person data, cookie auth, hidden gateway errors, rate
   limit, report logging.
 
 ## Open items

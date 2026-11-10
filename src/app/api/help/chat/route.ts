@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createUIMessageStreamResponse, streamText, toUIMessageStream, type ModelMessage } from "ai";
 import { z } from "zod";
 import { getRequestAuth } from "@/lib/supabase/request";
-import { aiConfigured, aiModel, aiProviderOptions } from "@/lib/ai/client";
+import { aiConfigured, aiModel, helpProviderOptions } from "@/lib/ai/client";
 import { DEFAULT_FAQ } from "@shared/help/default-faq";
 
 // Family help bot. Answers only from the platform FAQ and the facility FAQ/policies returned by help_context().
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     instructions: instructions(context),
     messages,
     maxOutputTokens: 500,
-    providerOptions: aiProviderOptions,
+    providerOptions: helpProviderOptions,
   });
 
   return createUIMessageStreamResponse({
